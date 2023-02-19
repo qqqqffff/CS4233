@@ -1,7 +1,7 @@
 package escape.gui;
 
 public enum State {
-    HOME_SCREEN,
+    HOME,
     GAME_SELECT,
     IN_GAME,
     SETTINGS,

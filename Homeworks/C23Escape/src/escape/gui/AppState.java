@@ -39,6 +39,13 @@ public interface AppState {
     void restoreData(Map<String, String> data);
 
     /**
+     * Generate Data Method:
+     * Method to generate the App State Data
+     * @return map of the data
+     */
+    Map<String, String> generateData();
+
+    /**
      * Compute Offsets Function:
      * Computes the sizes to be used by the App State based on defaults
      * Note - overloaded
@@ -104,13 +111,5 @@ public interface AppState {
         offsets_list.put(OffsetType.width, offsets.getWidth());
         offsets_list.put(OffsetType.height, offsets.getHeight());
         return offsets_list;
-    }
-
-    //TODO add javadoc comment
-    default double computeSize(Button button, OffsetType type){
-        if(type == OffsetType.x || type == OffsetType.y) throw new IllegalArgumentException("Type must be width or height");
-        Text button_text = new Text(button.getText());
-        button_text.setFont(new Font(button.getFont().getSize()));
-        return type == OffsetType.width ? button_text.getLayoutBounds().getWidth() + 4: button_text.getLayoutBounds().getHeight() + 4;
     }
 }

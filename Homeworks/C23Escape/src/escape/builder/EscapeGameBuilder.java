@@ -149,6 +149,9 @@ public class EscapeGameBuilder {
 					return null;
 				}
 			}
+			public boolean equals(Coordinate coord1, Coordinate coord2){
+				return coord1.getColumn() == coord2.getColumn() && coord1.getRow() == coord2.getRow();
+			}
 		};
 	}
 }
