@@ -10,8 +10,7 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="lib" level="project" />
-    <orderEntry type="library" name="lib (2)" level="project" />
-    <orderEntry type="module-library" scope="TEST">
+    <orderEntry type="module-library" exported="" scope="TEST">
       <library name="JUnit5.7.0">
         <CLASSES>
           <root url="jar://$MODULE_DIR$/lib/junit-jupiter-5.7.0.jar!/" />
@@ -27,5 +26,11 @@
         <SOURCES />
       </library>
     </orderEntry>
+    <orderEntry type="library" exported="" name="openjfx.javafx.base" level="project" />
+    <orderEntry type="library" exported="" name="openjfx.javafx.controls" level="project" />
+    <orderEntry type="library" exported="" name="openjfx.javafx.graphics" level="project" />
+    <orderEntry type="library" exported="" name="openjfx.javafx.media" level="project" />
+    <orderEntry type="library" exported="" name="google.code.gson" level="project" />
+    <orderEntry type="library" exported="" name="openjfx.javafx.web" level="project" />
   </component>
 </module>

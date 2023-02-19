@@ -12,14 +12,17 @@
 
 package escape.builder;
 
-import econfig.*;
-import escape.*;
+import econfig.EscapeConfigurator;
+import escape.EscapeGameManager;
 import escape.required.Coordinate;
-import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.CharStreams;
 
-import javax.xml.bind.*;
-import javax.xml.transform.stream.*;
-import java.io.*;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+import javax.xml.transform.stream.StreamSource;
+import java.io.IOException;
+import java.io.StringReader;
 
 /**
  * This class builds an instance of an EscapeGameManager from a configuration
@@ -49,8 +52,7 @@ import java.io.*;
  * your game instance. Just creating the game instance should take as little time
  * as possible to implement.
  */
-public class EscapeGameBuilder
-{
+public class EscapeGameBuilder {
     private final EscapeGameInitializer gameInitializer;
     
     /**
@@ -110,20 +112,19 @@ public class EscapeGameBuilder
 	 * all of the information you need to create your game.
      * @return the game instance
      ***********************************************************************/
-    public EscapeGameManager makeGameManager()
-    {
-    	// >>> YOU MUST IMPLEMENT THIS METHOD<<<
+    public EscapeGameManager makeGameManager() {
+		// >>> YOU MUST IMPLEMENT THIS METHOD<<<
 		return new EscapeGameManager() {
 			@Override
 			public Coordinate makeCoordinate(int x, int y) {
 
-				if(gameInitializer.getCoordinateType() == Coordinate.CoordinateType.HEX){
-					if(x > gameInitializer.getxMax() || x < -gameInitializer.getxMax()
+				if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.HEX) {
+					if (x > gameInitializer.getxMax() || x < -gameInitializer.getxMax()
 							|| y > gameInitializer.getyMax() || y < -gameInitializer.getyMax()) return null;
 					return new Coordinate() {
 						@Override
 						public int getRow() {
-							return y + (x/2);
+							return y + (x / 2);
 						}
 
 						@Override
@@ -131,9 +132,8 @@ public class EscapeGameBuilder
 							return x;
 						}
 					};
-				}
-				else if(gameInitializer.getCoordinateType() == Coordinate.CoordinateType.SQUARE) {
-					if(x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0) return null;
+				} else if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.SQUARE) {
+					if (x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0) return null;
 					return new Coordinate() {
 						@Override
 						public int getRow() {
@@ -145,11 +145,10 @@ public class EscapeGameBuilder
 							return x;
 						}
 					};
-				}
-				else{
+				} else {
 					return null;
 				}
 			}
 		};
-    }
+	}
 }

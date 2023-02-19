@@ -62,7 +62,7 @@ public class EscapeGameBuilderTest {
         assertEquals(hex_coord_test_builder.getGameInitializer().getCoordinateType(), Coordinate.CoordinateType.HEX);
         assertEquals(hex_coord_test_builder.getGameInitializer().getxMax(),3);
         assertEquals(hex_coord_test_builder.getGameInitializer().getyMax(),3);
-        assertEquals(hex_coord_test_builder.getGameInitializer().getPlayers().length,3);
+        assertEquals(hex_coord_test_builder.getGameInitializer().getPlayers().length,2);
     }
     @Test
     public void testCoordinateHex2(){
