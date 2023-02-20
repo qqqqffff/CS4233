@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 public class Screen extends Application {
     public static final double DEFAULT_WIDTH = 800;
     public static final double DEFAULT_HEIGHT = 800;
+    public static final long DEFAULT_LOAD_TIME = 200;
     private static final Pane root = new Pane();
     private final Scene scene;
     public Screen(){

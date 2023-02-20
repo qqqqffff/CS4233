@@ -57,6 +57,7 @@ public class LocationInitializer
         this.pieceName = pieceName;
     }
 
+    //TODO: verify that all the pieces are owned by the players
     public static LocationInitializer parseLocationInitializer(JsonReader reader)throws Exception{
         if(reader == null) throw new NullPointerException("Reader is null");
         LocationInitializer locationInitializer = new LocationInitializer();

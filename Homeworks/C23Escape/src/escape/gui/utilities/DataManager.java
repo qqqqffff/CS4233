@@ -17,7 +17,7 @@ import javafx.scene.Group;
 
 public class DataManager {
     private enum Directories {save_state};
-    public enum SaveStateKeys {state};
+    public enum SaveStateKeys {state, econfig_path};
     public final static Path save_state_directory = Path.of("src/escape/data/save_state.json");
     public final static Path data_directory = Path.of("src/escape/data/");
     public final static Path escape_configs_directory = Path.of("src/escape/data/escape_configs/");
@@ -46,8 +46,8 @@ public class DataManager {
         jr.beginObject();
         while(jr.hasNext()) {
             String key = jr.nextName();
+            String value = jr.nextString();
             if(Objects.equals(key, SaveStateKeys.state.name())){
-                String value = jr.nextString();
                 switch(value) {
                     case "HOME" -> AppStateManager.setActiveState(State.HOME);
                     case "GAME_SELECT" -> AppStateManager.setActiveState(State.GAME_SELECT);
@@ -71,17 +71,18 @@ public class DataManager {
         }
     }
     public static void updateSaveStateData(Map<String, String> data){
-        JsonWriter writer;
         try {
+            JsonWriter writer = new JsonWriter(new FileWriter(save_state_directory.toString()));
+            writer.setIndent("  ");
+            writer.beginObject();
             switch (data.get(SaveStateKeys.state.name())) {
-                case "GAME_SELECT", "HOME" -> {
-                    writer = new JsonWriter(new FileWriter(save_state_directory.toString()));
-                    writer.setIndent("  ");
-                    writer.beginObject();
+                case "GAME_SELECT", "HOME" -> writer.name(SaveStateKeys.state.name()).value(data.get(SaveStateKeys.state.name()));
+                case "IN_GAME" -> {
                     writer.name(SaveStateKeys.state.name()).value(data.get(SaveStateKeys.state.name()));
-                    writer.endObject().close();
+                    writer.name(SaveStateKeys.econfig_path.name()).value(data.get(SaveStateKeys.econfig_path.name()));
                 }
             }
+            writer.endObject().close();
         }catch(Exception e){
             e.printStackTrace();
         }

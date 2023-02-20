@@ -11,4 +11,7 @@ module escape {
 
     exports escape.gui;
     exports escape.gui.utilities;
+    exports escape.builder;
+    exports escape;
+    exports escape.gui.states;
 }

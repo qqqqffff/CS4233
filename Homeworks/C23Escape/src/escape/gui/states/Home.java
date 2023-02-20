@@ -14,6 +14,8 @@ import javafx.scene.text.Text;
 
 import java.util.Map;
 
+import static escape.gui.Screen.DEFAULT_LOAD_TIME;
+
 public class Home extends Group implements AppState {
     private Rectangle background;
     private Text titleText;
@@ -108,7 +110,7 @@ public class Home extends Group implements AppState {
 
         new Thread(() -> {
             try {
-                Thread.sleep(200);
+                Thread.sleep(DEFAULT_LOAD_TIME);
                 playButton.setLayoutX((DEFAULT_SCREEN_WIDTH - playButton.getWidth()) / 2);
                 testsButton.setLayoutX((DEFAULT_SCREEN_WIDTH - testsButton.getWidth()) / 2);
                 profileButton.setLayoutX((DEFAULT_SCREEN_WIDTH - profileButton.getWidth()) / 2);

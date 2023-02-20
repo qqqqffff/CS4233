@@ -1,7 +1,10 @@
 package escape.gui.utilities;
 
+import escape.builder.EscapeGameBuilder;
+import escape.builder.EscapeGameInitializer;
 import escape.gui.Screen;
 import escape.gui.State;
+import escape.gui.states.Game;
 import escape.gui.states.GameSelect;
 import escape.gui.states.Home;
 import javafx.scene.Group;
@@ -12,6 +15,7 @@ import java.util.Map;
 public class AppStateManager {
     private static final Home homeState = new Home();
     private static final GameSelect gameSelectState = new GameSelect();
+    private static Game gameState = new Game(null);
     private static Map<Group, Boolean> states;
     private AppStateManager(){}
 
@@ -19,6 +23,7 @@ public class AppStateManager {
         states = new HashMap<>();
         states.put(homeState, false);
         states.put(gameSelectState, false);
+        states.put(gameState, false);
     }
 
     public static Group getActiveAppState(){
@@ -33,6 +38,7 @@ public class AppStateManager {
         switch(activeState){
             case HOME -> states.put(homeState, true);
             case GAME_SELECT -> states.put(gameSelectState, true);
+            case IN_GAME -> states.put(gameState, true);
         }
         Screen.addChild(getActiveAppState());
     }
@@ -41,12 +47,19 @@ public class AppStateManager {
         if(data == null) data = new HashMap<>();
 
         switch(destination){
+            case HOME -> {
+                //TODO: implement me
+            }
             case GAME_SELECT -> {
                 data.put(DataManager.SaveStateKeys.state.name(), State.GAME_SELECT.name());
                 if(origin == State.HOME) setActiveState(State.GAME_SELECT);
                 else{
                     //do something
                 }
+            }
+            case IN_GAME -> {
+                data.put(DataManager.SaveStateKeys.state.name(), State.IN_GAME.name());
+                setActiveState(State.IN_GAME);
             }
         }
 
@@ -60,5 +73,13 @@ public class AppStateManager {
     }
     public static void launchGame(String econfigPath){
         //TODO implement me
+        try {
+            gameState = new Game(new EscapeGameBuilder(econfigPath).getGameInitializer());
+            Map<String, String> data = new HashMap<>();
+            data.put(DataManager.SaveStateKeys.econfig_path.name(), econfigPath);
+            transitionStates(State.GAME_SELECT, State.IN_GAME, data);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 }

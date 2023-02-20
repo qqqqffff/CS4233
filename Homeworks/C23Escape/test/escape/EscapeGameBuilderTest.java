@@ -71,10 +71,10 @@ public class EscapeGameBuilderTest {
     }
 
     @Test
-    public void testSomething() throws Exception{
+    public void testJson() throws Exception{
         JsonReader jsonReader = new JsonReader(new FileReader("test/escape_configs/test.json"));
         jsonReader.beginObject();
-        System.out.println(jsonReader.nextName());
+        System.out.println(jsonReader.nextName() + ", " + jsonReader.nextString() + "\n" + jsonReader.nextName());
         jsonReader.beginArray();
         while(jsonReader.hasNext()) {
             jsonReader.beginObject();

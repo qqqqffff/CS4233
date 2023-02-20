@@ -1,0 +1,13 @@
+{
+  "coordinate_type": "SQUARE",
+  "y_max": "5",
+  "x_max": "5",
+  "players": ["John", "Donald"],
+  "locations": [{
+    "x": "0",
+    "y": "0",
+    "player": "player1",
+    "location_type": "CLEAR",
+    "piece_name": "SNAIL"
+  }]
+}

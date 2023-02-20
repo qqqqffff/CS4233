@@ -168,12 +168,11 @@ public class EscapeGameBuilder {
 	 * all of the information you need to create your game.
      * @return the game instance
      ***********************************************************************/
-    public EscapeGameManager makeGameManager() {
+    public EscapeGameManager<Coordinate> makeGameManager() {
 		// >>> YOU MUST IMPLEMENT THIS METHOD<<<
-		return new EscapeGameManager() {
+		return new EscapeGameManager<Coordinate>() {
 			@Override
 			public Coordinate makeCoordinate(int x, int y) {
-
 				if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.HEX) {
 					if (x > gameInitializer.getxMax() || x < -gameInitializer.getxMax()
 							|| y > gameInitializer.getyMax() || y < -gameInitializer.getyMax()) return null;

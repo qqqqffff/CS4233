@@ -77,4 +77,6 @@ public interface EscapeGameManager<C extends Coordinate>
 	{
 	    throw new EscapeException("Not implemented");
 	}
+
+
 }
