@@ -9,7 +9,9 @@
  *
  * Copyright ©2023 Gary F. Pollice
  *******************************************************************************/
-package escape.required;
+package escape;
+
+import escape.Coordinate;
 
 /**
  * This interface defines all of the information for a

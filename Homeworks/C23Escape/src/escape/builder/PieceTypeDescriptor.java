@@ -11,8 +11,10 @@
  *******************************************************************************/
 package escape.builder;
 
-import escape.required.EscapePiece.*;
-import escape.required.*;
+import com.google.gson.stream.JsonReader;
+import escape.EscapePiece;
+import escape.EscapePiece.*;
+import escape.PieceAttribute;
 
 import java.util.*;
 
@@ -92,6 +94,36 @@ public class PieceTypeDescriptor
 				.findFirst();
 		return attr.isPresent() ? attr.get() : null;
 	}
+
+    public static PieceTypeDescriptor parsePieceTypeDescriptor(JsonReader reader) throws Exception{
+        if(reader == null) throw new NullPointerException("Reader is null");
+        PieceTypeDescriptor pieceTypeDescriptor = new PieceTypeDescriptor();
+        while(reader.hasNext()){
+            String key = reader.nextName();
+            switch(key){
+                case "piece_name" -> pieceTypeDescriptor.pieceName = EscapePiece.parsePieceName(reader.nextString());
+                case "movement_pattern" -> pieceTypeDescriptor.movementPattern = EscapePiece.parseMovementPattern(reader.nextString());
+                case "attributes" -> {
+                    reader.beginObject();
+                    while(reader.hasNext()){
+                        pieceTypeDescriptor.addPieceAttribute(parsePieceAttribute(reader));
+                    }
+                    reader.endObject();
+                }
+            }
+        }
+        return pieceTypeDescriptor;
+    }
+
+    private static PieceAttribute parsePieceAttribute(JsonReader reader) throws Exception {
+        return new PieceAttribute(EscapePiece.parsePieceAttributeID(reader.nextName()), Integer.parseInt(reader.nextString()));
+    }
+    private void addPieceAttribute(PieceAttribute ... pieceAttribute){
+        PieceAttribute[] pieceAttributes = new PieceAttribute[this.attributes.length + pieceAttribute.length];
+        System.arraycopy(this.attributes,0, pieceAttributes,0, this.attributes.length);
+        System.arraycopy(pieceAttribute,0,pieceAttributes,this.attributes.length, pieceAttribute.length);
+        this.attributes = pieceAttributes;
+    }
 
 	/*
 	 * @see java.lang.Object#toString()

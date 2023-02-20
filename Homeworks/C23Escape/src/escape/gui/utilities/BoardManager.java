@@ -63,8 +63,8 @@ public class BoardManager {
                     for(int row = 0; row < rows; row++){
                         if(gameIcon[row][col] == null) break;
                         //TODO something
-                        gameIcon[row][col].setLayoutX();
-                        gameIcon[row][col].setLayoutY();
+//                        gameIcon[row][col].setLayoutX();
+//                        gameIcon[row][col].setLayoutY();
                     }
                 }
             }catch (InterruptedException e){

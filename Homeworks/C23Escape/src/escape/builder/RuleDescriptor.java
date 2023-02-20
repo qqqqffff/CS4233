@@ -12,7 +12,8 @@
 
 package escape.builder;
 
-import escape.required.Rule.*;
+import com.google.gson.stream.JsonReader;
+import escape.Rule.*;
 
 /**
  * A JavaBean that represents an attribute for rule. This file
@@ -45,6 +46,18 @@ public class RuleDescriptor
 	{
 		this.ruleId = ruleId;
 		this.ruleValue = ruleValue;
+	}
+
+	public static RuleDescriptor parseRuleDescriptor(JsonReader reader) throws Exception{
+		if(reader == null) throw new NullPointerException("Reader is null");
+		RuleDescriptor ruleDescriptor = new RuleDescriptor();
+		switch(reader.nextName()){
+			case "POINT_CONFLICT" -> ruleDescriptor.ruleId = RuleID.POINT_CONFLICT;
+			case "SCORE" -> ruleDescriptor.ruleId = RuleID.SCORE;
+			case "TURN_LIMIT" -> ruleDescriptor.ruleId = RuleID.TURN_LIMIT;
+		}
+		ruleDescriptor.ruleValue = Integer.parseInt(reader.nextString());
+		return ruleDescriptor;
 	}
 
 	/*

@@ -9,9 +9,9 @@
  * 
  * Copyright ©2016-2023 Gary F. Pollice
  *******************************************************************************/
-package escape.required;
+package escape;
 
-import escape.required.EscapePiece.PieceAttributeID;
+import escape.EscapePiece.PieceAttributeID;
 
 /**
  * A JavaBean that represents an attribute for piece. This file
@@ -27,10 +27,14 @@ import escape.required.EscapePiece.PieceAttributeID;
  */
 public class PieceAttribute {
 	
-    PieceAttributeID id;
-    int value;
+    public PieceAttributeID id;
+    public int value;
     
     public PieceAttribute() {}
+	public PieceAttribute(PieceAttributeID id, int value){
+		this.id = id;
+		this.value = value;
+	}
     
     public PieceAttributeID getId() { return id; }
     public void setId(PieceAttributeID id) { this.id = id; }

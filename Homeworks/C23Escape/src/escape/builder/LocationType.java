@@ -9,7 +9,9 @@
  * 
  * Copyright ©2016-2023 Gary F. Pollice
  *******************************************************************************/
-package escape.required;
+package escape.builder;
+
+import static escape.builder.LocationType.LocationTypes.*;
 
 /**
  * Every location (e.g., square) on an Escape board has a type. This enumeration
@@ -19,7 +21,12 @@ package escape.required;
  * MOVEABLE: YES
  * REQUIRED: YES
  */
-public enum LocationType
-{
-	BLOCK, CLEAR, EXIT;
+public interface LocationType {
+	enum LocationTypes { BLOCK, CLEAR, EXIT }
+	static LocationTypes parseLocationTypes(String locationTypes){
+		if(locationTypes.equals(CLEAR.name())) return CLEAR;
+		else if(locationTypes.equals(BLOCK.name())) return BLOCK;
+		else if(locationTypes.equals(EXIT.name())) return EXIT;
+		return null;
+	}
 }

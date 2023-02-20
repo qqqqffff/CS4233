@@ -10,7 +10,9 @@
  * Copyright ©2016-2023 Gary F. Pollice
  *******************************************************************************/
 
-package escape.required;
+package escape;
+
+import escape.EscapeException;
 
 /**
  * The interface for a client to use to get messages from the

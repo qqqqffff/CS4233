@@ -11,8 +11,10 @@
  *******************************************************************************/
 package escape.builder;
 
-import escape.required.*;
-import escape.required.EscapePiece.*;
+import com.google.gson.stream.JsonReader;
+import escape.EscapePiece;
+import escape.EscapePiece.PieceName;
+import escape.builder.LocationType.LocationTypes;
 
 /**
  * A general initializer for a board location. Since this is used
@@ -36,7 +38,7 @@ import escape.required.EscapePiece.*;
 public class LocationInitializer
 {
 	public int x, y;
-	public LocationType locationType;
+	public LocationTypes locationType;
 	public String player;
 	public PieceName pieceName;
 	
@@ -45,7 +47,7 @@ public class LocationInitializer
 	    // needed for JAXB unmarshalling
 	}
 	
-    public LocationInitializer(int x, int y, LocationType locationType,
+    public LocationInitializer(int x, int y, LocationTypes locationType,
         String player, PieceName pieceName)
     {
     	this.x = x;
@@ -53,6 +55,24 @@ public class LocationInitializer
         this.locationType = locationType;
         this.player = player;
         this.pieceName = pieceName;
+    }
+
+    public static LocationInitializer parseLocationInitializer(JsonReader reader)throws Exception{
+        if(reader == null) throw new NullPointerException("Reader is null");
+        LocationInitializer locationInitializer = new LocationInitializer();
+        while(reader.hasNext()){
+            String key = reader.nextName();
+            switch(key){
+                case "x" -> locationInitializer.x = Integer.parseInt(reader.nextString());
+                case "y" -> locationInitializer.y = Integer.parseInt(reader.nextString());
+                case "player" -> locationInitializer.player = reader.nextString();
+                case "location_type" -> locationInitializer.locationType = LocationType.parseLocationTypes(reader.nextString());
+                case "piece_name" -> {
+                    String value = reader.nextString();
+                    locationInitializer.pieceName = EscapePiece.parsePieceName(value);
+                }
+            }
+        }        return locationInitializer;
     }
 
     /*

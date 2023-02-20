@@ -12,7 +12,8 @@
 
 package escape.builder;
 
-import escape.required.Coordinate.*;
+import escape.Coordinate.*;
+import escape.EscapeException;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;
@@ -29,8 +30,7 @@ import java.util.*;
  * @see EscapeGameBuilder#makeGameManager()
  */
 @XmlRootElement
-public class EscapeGameInitializer
-{
+public class EscapeGameInitializer {
 	private CoordinateType coordinateType;
 	
 	// Board items
@@ -46,8 +46,11 @@ public class EscapeGameInitializer
 	// Players
 	private String[] players;
     
-    public EscapeGameInitializer()
-    {
+    public EscapeGameInitializer() {
+		locationInitializers = new LocationInitializer[]{};
+		pieceTypes = new PieceTypeDescriptor[]{};
+		rules = new RuleDescriptor[]{};
+		players = new String[]{};
         // Needed for JAXB
     }
 
@@ -62,8 +65,8 @@ public class EscapeGameInitializer
     /**
      * @param coordinateType the coordinateType to set
      */
-    public void setCoordinateType(CoordinateType coordinateType)
-    {
+    public void setCoordinateType(CoordinateType coordinateType) {
+		if(coordinateType == null) throw new EscapeException("Coordinate Type is null");
         this.coordinateType = coordinateType;
     }
 
@@ -113,6 +116,31 @@ public class EscapeGameInitializer
 	public void setLocationInitializers(LocationInitializer ... locationInitializers)
 	{
 		this.locationInitializers = locationInitializers;
+	}
+
+	public void addLocationInitializer(LocationInitializer ... locationInitializer){
+		LocationInitializer[] locationInitializers = new LocationInitializer[this.locationInitializers.length + locationInitializer.length];
+		System.arraycopy(this.locationInitializers, 0, locationInitializers, 0, this.locationInitializers.length);
+		System.arraycopy(locationInitializer, 0, locationInitializers, this.locationInitializers.length, locationInitializer.length);
+		this.locationInitializers = locationInitializers;
+	}
+	public void addPlayers(String ... player){
+		String[] players = new String[this.players.length + player.length];
+		System.arraycopy(this.players,0, players,0,this.players.length);
+		System.arraycopy(player,0,players,this.players.length,player.length);
+		this.players = players;
+	}
+	public void addRules(RuleDescriptor ... rule){
+		RuleDescriptor[] rules = new RuleDescriptor[this.rules.length + rule.length];
+		System.arraycopy(this.rules,0, rules,0, this.rules.length);
+		System.arraycopy(rule,0, rules, this.rules.length, rule.length);
+		this.rules = rules;
+	}
+	public void addPieceTypes(PieceTypeDescriptor ... pieceType){
+		PieceTypeDescriptor[] pieceTypes = new PieceTypeDescriptor[this.pieceTypes.length + pieceType.length];
+		System.arraycopy(this.pieceTypes,0, pieceTypes,0, this.pieceTypes.length);
+		System.arraycopy(pieceType,0,pieceTypes,0, pieceType.length);
+		this.pieceTypes = pieceTypes;
 	}
 
 	/**

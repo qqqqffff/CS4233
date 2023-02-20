@@ -11,8 +11,6 @@
  *******************************************************************************/
 package escape;
 
-import escape.required.*;
-
 /**
  * This interface describes the behavior of the Escape game manager. Every instance
  * of an Escape game manager must implement this interface. The methods described here are

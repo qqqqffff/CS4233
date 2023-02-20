@@ -1,0 +1,11 @@
+{
+  "coordinate_type": "HEX",
+  "y_max": "3",
+  "x_max": "3",
+  "players": ["Jeremy", "Jefferey"],
+  "locations": [{
+    "x": "0",
+    "y": "0",
+    "location_type": "CLEAR"
+  }]
+}

@@ -12,17 +12,21 @@
 
 package escape.builder;
 
+import com.google.gson.stream.JsonReader;
 import econfig.EscapeConfigurator;
 import escape.EscapeGameManager;
-import escape.required.Coordinate;
-import org.antlr.v4.runtime.CharStreams;
+import escape.Coordinate;
+//import org.antlr.v4.runtime.CharStreams;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.transform.stream.StreamSource;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+
+import escape.Coordinate.CoordinateType;
 
 /**
  * This class builds an instance of an EscapeGameManager from a configuration
@@ -63,12 +67,11 @@ public class EscapeGameBuilder {
      * @param fileName the file for the Escape game configuration file (.egc).
      * @throws Exception on any errors
      */
-    public EscapeGameBuilder(String fileName) throws Exception
-    {
-    	String xmlConfiguration = getXmlConfiguration(fileName);
-    	// Uncomment the next instruction if you want to see the XML
-//		System.err.println(xmlConfiguration);
-        gameInitializer = unmarshalXml(xmlConfiguration);
+    public EscapeGameBuilder(String fileName) throws Exception {
+		//TODO: when i get the time i will implement a converter if i ever get the time
+		if(fileName.contains(".egc")) throw new RuntimeException("egc files are not supported, use json");
+		JsonReader reader = new JsonReader(new FileReader(fileName));
+    	gameInitializer = readFromJson(reader);
     }
 
 	/**
@@ -77,10 +80,12 @@ public class EscapeGameBuilder {
 	 * @return the XML data needed to 
 	 * @throws IOException
 	 */
+	@Deprecated
 	private String getXmlConfiguration(String fileName) throws IOException
 	{
 		EscapeConfigurator configurator = new EscapeConfigurator();
-    	return configurator.makeConfiguration(CharStreams.fromFileName(fileName));
+//    	return configurator.makeConfiguration(CharStreams.fromFileName(fileName));
+		return null;
 	}
 
 	/**
@@ -104,6 +109,57 @@ public class EscapeGameBuilder {
 	public EscapeGameInitializer getGameInitializer()
 	{
 		return gameInitializer;
+	}
+
+	private EscapeGameInitializer readFromJson(JsonReader jsonReader){
+		EscapeGameInitializer esgInitializer = new EscapeGameInitializer();
+		try {
+			jsonReader.beginObject();
+			while (jsonReader.hasNext()) {
+				String key = jsonReader.nextName();
+				switch(key){
+					case "coordinate_type" -> esgInitializer.setCoordinateType(Coordinate.parseCoordinateType(jsonReader.nextString()));
+					case "x_max" -> esgInitializer.setxMax(Integer.parseInt(jsonReader.nextString()));
+					case "y_max" -> esgInitializer.setyMax(Integer.parseInt(jsonReader.nextString()));
+					case "locations" -> {
+						jsonReader.beginArray();
+						while(jsonReader.hasNext()) {
+							jsonReader.beginObject();
+							esgInitializer.addLocationInitializer(LocationInitializer.parseLocationInitializer(jsonReader));
+							jsonReader.endObject();
+						}
+						jsonReader.endArray();
+					}
+					case "players" -> {
+						jsonReader.beginArray();
+						while(jsonReader.hasNext()) {
+							esgInitializer.addPlayers(jsonReader.nextString());
+						}
+						jsonReader.endArray();
+					}
+					case "piece_descriptors" -> {
+						jsonReader.beginArray();
+						while(jsonReader.hasNext()) {
+							jsonReader.beginObject();
+							esgInitializer.addPieceTypes(PieceTypeDescriptor.parsePieceTypeDescriptor(jsonReader));
+							jsonReader.endObject();
+						}
+						jsonReader.endArray();
+					}
+					case "rules" -> {
+						jsonReader.beginObject();
+						while(jsonReader.hasNext()){
+							esgInitializer.addRules(RuleDescriptor.parseRuleDescriptor(jsonReader));
+						}
+						jsonReader.endObject();
+					}
+				}
+			}
+		}
+		catch (Exception ignored){
+
+		}
+		return esgInitializer;
 	}
     
     /***********************************************************************

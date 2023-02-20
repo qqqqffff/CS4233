@@ -8,7 +8,7 @@
  * Copyright ©2020-2023 Gary F. Pollice
  *******************************************************************************/
 
-package escape.required;
+package escape;
 
 /**
  * Interface for the rule implementations. It also contains a static
