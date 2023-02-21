@@ -5,7 +5,7 @@ module escape {
 
     requires com.google.gson;
     requires java.xml.bind;
-    //TODO: fix me
+    //FIXED! or not (lazy prof with bad coding practices teaching a course about having good coding practices). Note if you have dependencies for a starter code you should use a dependency manager especially if you build your own dependency
 //    requires antlr4;
     requires Escape.Configuration.Tool;
 
@@ -14,4 +14,5 @@ module escape {
     exports escape.builder;
     exports escape;
     exports escape.gui.states;
+    exports escape.required;
 }

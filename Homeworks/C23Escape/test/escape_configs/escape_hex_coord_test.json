@@ -6,6 +6,6 @@
   "locations": [{
     "x": "0",
     "y": "0",
-    "location_type": "CLEAR"
+    "location_type": "BLOCK"
   }]
 }

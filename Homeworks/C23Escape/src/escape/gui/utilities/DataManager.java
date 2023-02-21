@@ -11,9 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import escape.EscapeGameManager;
 import escape.gui.State;
-import javafx.scene.Group;
 
 public class DataManager {
     private enum Directories {save_state};

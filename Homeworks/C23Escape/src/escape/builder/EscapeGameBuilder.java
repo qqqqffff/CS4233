@@ -15,7 +15,7 @@ package escape.builder;
 import com.google.gson.stream.JsonReader;
 import econfig.EscapeConfigurator;
 import escape.EscapeGameManager;
-import escape.Coordinate;
+import escape.required.*;
 //import org.antlr.v4.runtime.CharStreams;
 
 import javax.xml.bind.JAXBContext;
@@ -25,8 +25,8 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
-
-import escape.Coordinate.CoordinateType;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * This class builds an instance of an EscapeGameManager from a configuration
@@ -71,7 +71,7 @@ public class EscapeGameBuilder {
 		//TODO: when i get the time i will implement a converter if i ever get the time
 		if(fileName.contains(".egc")) throw new RuntimeException("egc files are not supported, use json");
 		JsonReader reader = new JsonReader(new FileReader(fileName));
-    	gameInitializer = readFromJson(reader);
+    	gameInitializer = EscapeJsonConverter.readFromJson(reader);
     }
 
 	/**
@@ -110,57 +110,6 @@ public class EscapeGameBuilder {
 	{
 		return gameInitializer;
 	}
-
-	private EscapeGameInitializer readFromJson(JsonReader jsonReader){
-		EscapeGameInitializer esgInitializer = new EscapeGameInitializer();
-		try {
-			jsonReader.beginObject();
-			while (jsonReader.hasNext()) {
-				String key = jsonReader.nextName();
-				switch(key){
-					case "coordinate_type" -> esgInitializer.setCoordinateType(Coordinate.parseCoordinateType(jsonReader.nextString()));
-					case "x_max" -> esgInitializer.setxMax(Integer.parseInt(jsonReader.nextString()));
-					case "y_max" -> esgInitializer.setyMax(Integer.parseInt(jsonReader.nextString()));
-					case "locations" -> {
-						jsonReader.beginArray();
-						while(jsonReader.hasNext()) {
-							jsonReader.beginObject();
-							esgInitializer.addLocationInitializer(LocationInitializer.parseLocationInitializer(jsonReader));
-							jsonReader.endObject();
-						}
-						jsonReader.endArray();
-					}
-					case "players" -> {
-						jsonReader.beginArray();
-						while(jsonReader.hasNext()) {
-							esgInitializer.addPlayers(jsonReader.nextString());
-						}
-						jsonReader.endArray();
-					}
-					case "piece_descriptors" -> {
-						jsonReader.beginArray();
-						while(jsonReader.hasNext()) {
-							jsonReader.beginObject();
-							esgInitializer.addPieceTypes(PieceTypeDescriptor.parsePieceTypeDescriptor(jsonReader));
-							jsonReader.endObject();
-						}
-						jsonReader.endArray();
-					}
-					case "rules" -> {
-						jsonReader.beginObject();
-						while(jsonReader.hasNext()){
-							esgInitializer.addRules(RuleDescriptor.parseRuleDescriptor(jsonReader));
-						}
-						jsonReader.endObject();
-					}
-				}
-			}
-		}
-		catch (Exception ignored){
-
-		}
-		return esgInitializer;
-	}
     
     /***********************************************************************
      * Once the EscapeGameIniializer is constructed, this method creates the
@@ -168,14 +117,24 @@ public class EscapeGameBuilder {
 	 * all of the information you need to create your game.
      * @return the game instance
      ***********************************************************************/
+	//TODO: implement a current game data manager (json)
     public EscapeGameManager<Coordinate> makeGameManager() {
-		// >>> YOU MUST IMPLEMENT THIS METHOD<<<
 		return new EscapeGameManager<Coordinate>() {
+			GameStatus currentGameStatus;
+			Location[] locations;
+			public void init(){
+				//if(player_choice) return; //TODO: implement me
+				for(LocationInitializer location : gameInitializer.getLocationInitializers()){
+					Coordinate locationCoordinate = makeCoordinate(location.getX(), location.getY());
+				}
+			}
+
 			@Override
 			public Coordinate makeCoordinate(int x, int y) {
+				if(gameInitializer.getCoordinateType() == null) throw new EscapeException("Coordinate Type is not defined or null");
 				if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.HEX) {
-					if (x > gameInitializer.getxMax() || x < -gameInitializer.getxMax()
-							|| y > gameInitializer.getyMax() || y < -gameInitializer.getyMax()) return null;
+					if (x > gameInitializer.getxMax() || x < -gameInitializer.getxMax() || y > gameInitializer.getyMax() || y < -gameInitializer.getyMax())
+						throw new EscapeException("Coordinate Creation is out of bounds");
 					return new Coordinate() {
 						@Override
 						public int getRow() {
@@ -186,9 +145,15 @@ public class EscapeGameBuilder {
 						public int getColumn() {
 							return x;
 						}
+						@Override
+						public boolean equals(Coordinate obj) {
+							return this.getColumn() == obj.getColumn() && this.getRow() == obj.getRow();
+						}
 					};
-				} else if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.SQUARE) {
-					if (x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0) return null;
+				}
+				else if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.SQUARE) {
+					if (x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0)
+						throw new EscapeException("Coordinate Creation is out of bounds");
 					return new Coordinate() {
 						@Override
 						public int getRow() {
@@ -199,11 +164,68 @@ public class EscapeGameBuilder {
 						public int getColumn() {
 							return x;
 						}
+						@Override
+						public boolean equals(Coordinate obj) {
+							return this.getColumn() == obj.getColumn() && this.getRow() == obj.getRow();
+						}
 					};
-				} else {
-					return null;
 				}
+				throw new EscapeException("Coordinate Type is invalid");
 			}
+
+			@Override
+			public GameStatus move(Coordinate from, Coordinate to) {
+				if(getPieceAt(from) == null); //TODO: do something
+				EscapePiece piece = getPieceAt(from);
+				for(Location location : locations){
+					if(location.getCoordinate().equals(from)){
+						location.updateEscapePiece(null);
+					}
+					else if(location.getCoordinate().equals(to)){
+						//TODO: do something if there is a guy already there
+					}
+				}
+				//TODO: replace with a default game status maker
+				return new GameStatus() {
+					@Override
+					public boolean isValidMove() {
+						return false;
+					}
+
+					@Override
+					public boolean isMoreInformation() {
+						return false;
+					}
+
+					@Override
+					public MoveResult getMoveResult() {
+						return null;
+					}
+
+					@Override
+					public Coordinate finalLocation() {
+						return null;
+					}
+				};
+			}
+
+			@Override
+			public EscapePiece getPieceAt(Coordinate coordinate) {
+				return EscapeGameManager.super.getPieceAt(coordinate);
+			}
+
+
+
+			@Override
+			public GameObserver addObserver(GameObserver observer) {
+				return EscapeGameManager.super.addObserver(observer);
+			}
+
+			@Override
+			public GameObserver removeObserver(GameObserver observer) {
+				return EscapeGameManager.super.removeObserver(observer);
+			}
+
 			public boolean equals(Coordinate coord1, Coordinate coord2){
 				return coord1.getColumn() == coord2.getColumn() && coord1.getRow() == coord2.getRow();
 			}

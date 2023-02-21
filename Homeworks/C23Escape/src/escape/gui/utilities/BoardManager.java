@@ -1,12 +1,7 @@
 package escape.gui.utilities;
 
-import escape.Coordinate;
-import escape.EscapeGameManager;
-import escape.builder.EscapeGameBuilder;
-import escape.builder.EscapeGameInitializer;
 import escape.builder.LocationInitializer;
 import escape.gui.Offset;
-import escape.gui.states.Game;
 import javafx.scene.Group;
 import javafx.scene.control.Button;
 import javafx.scene.paint.Color;

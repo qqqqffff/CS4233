@@ -12,8 +12,10 @@
 
 package escape.builder;
 
-import escape.Coordinate.*;
-import escape.EscapeException;
+import escape.required.Coordinate.*;
+import escape.required.EscapeException;
+import escape.required.PieceTypeDescriptor;
+import escape.required.RuleDescriptor;
 
 import javax.xml.bind.annotation.*;
 import java.util.*;

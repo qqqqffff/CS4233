@@ -9,9 +9,9 @@
  * 
  * Copyright ©2016-2023 Gary F. Pollice
  *******************************************************************************/
-package escape;
+package escape.required;
 
-import escape.EscapePiece.PieceAttributeID;
+import escape.required.EscapePiece.PieceAttributeID;
 
 /**
  * A JavaBean that represents an attribute for piece. This file

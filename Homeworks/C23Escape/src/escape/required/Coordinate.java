@@ -10,8 +10,9 @@
  * Copyright ©2016-2023 Gary F. Pollice
  *******************************************************************************/
 
-package escape;
-import static escape.Coordinate.CoordinateType.*;
+package escape.required;
+
+import static escape.required.Coordinate.CoordinateType.*;
 
 /**
  * This interface defines the requirements for coordinates.
@@ -56,9 +57,11 @@ public interface Coordinate
 	default public int getColumn() {
 		throw new EscapeException("Not implemented");
 	}
-	static CoordinateType parseCoordinateType(String coordinateType){
-		if(coordinateType.equals(HEX.name())) return HEX;
-		else if(coordinateType.equals(SQUARE.name())) return SQUARE;
-		return null;
+
+
+	//TODO: generate java doc comment for this
+	default boolean equals(Coordinate coordinate){
+		if(coordinate == null) throw new NullPointerException("coordinate cannot be null");
+		return getRow() == coordinate.getRow() && getColumn() == coordinate.getColumn();
 	}
 }

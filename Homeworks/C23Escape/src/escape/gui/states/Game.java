@@ -1,10 +1,14 @@
 package escape.gui.states;
 
-import escape.*;
 import escape.builder.EscapeGameInitializer;
 import escape.builder.LocationInitializer;
 import escape.gui.AppState;
 import escape.gui.utilities.BoardManager;
+import escape.required.Coordinate;
+import escape.EscapeGameManager;
+import escape.required.EscapePiece;
+import escape.required.GameObserver;
+import escape.required.GameStatus;
 import javafx.scene.Group;
 
 import java.util.Map;

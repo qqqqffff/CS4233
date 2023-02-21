@@ -12,9 +12,10 @@
 package escape.builder;
 
 import com.google.gson.stream.JsonReader;
-import escape.EscapePiece;
-import escape.EscapePiece.PieceName;
-import escape.builder.LocationType.LocationTypes;
+import escape.required.Coordinate;
+import escape.required.EscapePiece;
+import escape.required.EscapePiece.PieceName;
+import escape.required.LocationType;
 
 /**
  * A general initializer for a board location. Since this is used
@@ -35,21 +36,22 @@ import escape.builder.LocationType.LocationTypes;
  * MOVEABLE: NO
  * REQUIRED: NO 
  */
-public class LocationInitializer
-{
-	public int x, y;
-	public LocationTypes locationType;
-	public String player;
-	public PieceName pieceName;
+public class LocationInitializer {
+	final private int x, y;
+    private Coordinate locationCoordinate;
+	final private LocationType locationType;
+	final private String player;
+	final private PieceName pieceName;
 	
-	public LocationInitializer() 
-	{
-	    // needed for JAXB unmarshalling
+	public LocationInitializer() {
+        this.x = 0;
+        this.y = 0;
+        this.locationType = null;
+        this.player = null;
+        this.pieceName = null;
 	}
 	
-    public LocationInitializer(int x, int y, LocationTypes locationType,
-        String player, PieceName pieceName)
-    {
+    public LocationInitializer(int x, int y, LocationType locationType, String player, PieceName pieceName) {
     	this.x = x;
         this.y = y;
         this.locationType = locationType;
@@ -57,24 +59,12 @@ public class LocationInitializer
         this.pieceName = pieceName;
     }
 
-    //TODO: verify that all the pieces are owned by the players
-    public static LocationInitializer parseLocationInitializer(JsonReader reader)throws Exception{
-        if(reader == null) throw new NullPointerException("Reader is null");
-        LocationInitializer locationInitializer = new LocationInitializer();
-        while(reader.hasNext()){
-            String key = reader.nextName();
-            switch(key){
-                case "x" -> locationInitializer.x = Integer.parseInt(reader.nextString());
-                case "y" -> locationInitializer.y = Integer.parseInt(reader.nextString());
-                case "player" -> locationInitializer.player = reader.nextString();
-                case "location_type" -> locationInitializer.locationType = LocationType.parseLocationTypes(reader.nextString());
-                case "piece_name" -> {
-                    String value = reader.nextString();
-                    locationInitializer.pieceName = EscapePiece.parsePieceName(value);
-                }
-            }
-        }        return locationInitializer;
-    }
+    public int getX() { return this.x; }
+    public int getY() { return this.y; }
+    public LocationType getLocationType() { return this.locationType; }
+    public String getPlayer() { return this.player; }
+    public PieceName getPieceName() { return this.pieceName; }
+    public Coordinate getLocationCoordinate(){ return this.locationCoordinate; }
 
     /*
      * @see java.lang.Object#toString()

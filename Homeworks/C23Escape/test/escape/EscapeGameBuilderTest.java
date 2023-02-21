@@ -2,7 +2,12 @@ package escape;
 
 import com.google.gson.stream.JsonReader;
 import escape.builder.EscapeGameBuilder;
-import escape.builder.LocationType;
+import escape.builder.EscapeGameInitializer;
+import escape.builder.EscapeJsonConverter;
+import escape.required.EscapeException;
+import escape.required.GameStatus;
+import escape.required.LocationType;
+import escape.required.Coordinate;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
@@ -47,31 +52,41 @@ public class EscapeGameBuilderTest {
     }
 
     @Test
-    public void testCoordinateHex0(){
-        assertNotEquals(hex_coord_test_manager.makeCoordinate(1,-1).getRow(), hex_coord_test_manager.makeCoordinate(-1,1).getRow());
-        assertNotEquals(hex_coord_test_manager.makeCoordinate(1,-1).getColumn(), hex_coord_test_manager.makeCoordinate(-1,1).getColumn());
-        assertEquals(hex_coord_test_manager.makeCoordinate(1,1).getRow(), hex_coord_test_manager.makeCoordinate(1,1).getRow());
-        assertEquals(hex_coord_test_manager.makeCoordinate(1,1).getColumn(), hex_coord_test_manager.makeCoordinate(1,1).getColumn());
+    public void testHexManager_makeCoordinate(){
+        Coordinate coord1 = hex_coord_test_manager.makeCoordinate(1,-1);
+        Coordinate coord2 = hex_coord_test_manager.makeCoordinate(1,-1);
+        Coordinate coord3 = hex_coord_test_manager.makeCoordinate(-1,1);
+        assertNotEquals(coord1.getRow(), coord3.getRow());
+        assertNotEquals(coord1.getColumn(), coord3.getColumn());
+        assertEquals(coord1.getRow(), coord2.getRow());
+        assertEquals(coord1.getColumn(), coord2.getColumn());
+        assertTrue(coord1.equals(coord2));
 
-        assertNull(hex_coord_test_manager.makeCoordinate(-4,-4));
-        assertNull(hex_coord_test_manager.makeCoordinate(4,4));
+        assertThrows(EscapeException.class, () -> hex_coord_test_manager.makeCoordinate(-4,-4));
+        assertThrows(EscapeException.class, () -> hex_coord_test_manager.makeCoordinate(4,4));
+    }
+
+    @Test
+    public void testManagerHexManager_move(){
+        Coordinate i = hex_coord_test_manager.makeCoordinate(0,0);
+        Coordinate f = hex_coord_test_manager.makeCoordinate(1,1);
+
+        GameStatus status = hex_coord_test_manager.move(i, f);
     }
     @Test
-    public void testCoordinateHex1(){
+    public void testBuilder_initialization(){
         assertEquals(hex_coord_test_builder.getGameInitializer().getCoordinateType(), Coordinate.CoordinateType.HEX);
         assertEquals(hex_coord_test_builder.getGameInitializer().getxMax(),3);
         assertEquals(hex_coord_test_builder.getGameInitializer().getyMax(),3);
         assertEquals(hex_coord_test_builder.getGameInitializer().getPlayers().length,2);
-    }
-    @Test
-    public void testCoordinateHex2(){
-        assertEquals(hex_coord_test_builder.getGameInitializer().getLocationInitializers()[0].locationType, LocationType.LocationTypes.CLEAR);
-        assertEquals(hex_coord_test_builder.getGameInitializer().getLocationInitializers()[0].x,0);
-        assertEquals(hex_coord_test_builder.getGameInitializer().getLocationInitializers()[0].y,0);
+
+        assertEquals(hex_coord_test_builder.getGameInitializer().getLocationInitializers()[0].getLocationType(), LocationType.CLEAR);
+        assertEquals(hex_coord_test_builder.getGameInitializer().getLocationInitializers()[0].getX(),0);
+        assertEquals(hex_coord_test_builder.getGameInitializer().getLocationInitializers()[0].getY(),0);
     }
 
     @Test
-    public void testJson() throws Exception{
+    public void testESGCJson() throws Exception{
         JsonReader jsonReader = new JsonReader(new FileReader("test/escape_configs/test.json"));
         jsonReader.beginObject();
         System.out.println(jsonReader.nextName() + ", " + jsonReader.nextString() + "\n" + jsonReader.nextName());
@@ -100,5 +115,10 @@ public class EscapeGameBuilderTest {
         jsonReader.endObject();
 
         jsonReader.close();
+    }
+
+    @Test
+    public void testJsonConverter() throws Exception{
+        EscapeGameInitializer egi = EscapeJsonConverter.esgConfigConverter("test/escape_configs/escape_square_coord_test.egc");
     }
 }

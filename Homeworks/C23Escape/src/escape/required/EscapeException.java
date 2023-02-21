@@ -9,7 +9,7 @@
  * 
  * Copyright ©2016-2023 Gary F. Pollice
  *******************************************************************************/
-package escape;
+package escape.required;
 
 /**
  * This is the base exception class for the Escape game. It is a subclass of
