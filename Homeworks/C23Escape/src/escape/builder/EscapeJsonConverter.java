@@ -3,6 +3,7 @@ package escape.builder;
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 import com.google.gson.stream.JsonReader;
 
@@ -19,6 +20,8 @@ import escape.required.*;
 
 
 public class EscapeJsonConverter {
+    public enum EscapeConfigKeys {}
+
 
     //TODO: generate java doc comments and fix inferences
     public static EscapeGameInitializer readFromJson(JsonReader jsonReader){
@@ -76,8 +79,27 @@ public class EscapeJsonConverter {
     public static EscapeGameInitializer esgConfigConverter(String fileName) throws IOException {
         EscapeGameInitializer esgInitializer = new EscapeGameInitializer();
         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
-        for(String line : bufferedReader.lines().toList()){
-            System.out.println();
+        String line = bufferedReader.readLine();
+        while(line != null){
+            if(line.contains("Coordinate")){
+                if(line.contains("type")){
+                    String type = line.substring(line.indexOf(':') + 1);
+                    esgInitializer.setCoordinateType(parseCoordinateType(type));
+                    System.out.println(type);
+                }
+            }
+            else if(line.contains("xMax")){
+                String max = line.substring(line.indexOf(':') + 1);
+                esgInitializer.setxMax(Integer.parseInt(max));;
+            }
+            else if(line.contains("yMax")){
+                String max = line.substring(line.indexOf(':') + 1);
+                esgInitializer.setyMax(Integer.parseInt(max));
+            }
+            else if(line.contains("Players")){
+                line = bufferedReader.readLine()
+            }
+            line = bufferedReader.readLine();
         }
         return esgInitializer;
     }

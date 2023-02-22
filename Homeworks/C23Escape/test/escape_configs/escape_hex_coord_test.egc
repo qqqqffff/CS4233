@@ -1,5 +1,13 @@
 Coordinate type : HEX
 xMax : 3
 yMax : 3
-Players : Jeffery Herman
-Locations : (0, 0) CLEAR
+Players :
+    Jeffery
+    Herman
+Locations :
+    (0, 0) CLEAR
+Piece descriptors :
+    SNAIL omni [distance 1]
+Rules :
+    SCORE 10
+    TURN_LIMIT 20
