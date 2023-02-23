@@ -141,7 +141,7 @@ public class EscapeGameInitializer {
 	public void addPieceTypes(PieceTypeDescriptor ... pieceType){
 		PieceTypeDescriptor[] pieceTypes = new PieceTypeDescriptor[this.pieceTypes.length + pieceType.length];
 		System.arraycopy(this.pieceTypes,0, pieceTypes,0, this.pieceTypes.length);
-		System.arraycopy(pieceType,0,pieceTypes,0, pieceType.length);
+		System.arraycopy(pieceType,0,pieceTypes,this.pieceTypes.length, pieceType.length);
 		this.pieceTypes = pieceTypes;
 	}
 

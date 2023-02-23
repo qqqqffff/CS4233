@@ -1,5 +1,8 @@
 Coordinate type : SQUARE
 xMax : 2
 yMax : 2
-Players : Chris Pat
-Locations : (2, 1) CLEAR
+Players :
+    Chris
+    Pat
+Locations :
+    (2, 1) CLEAR

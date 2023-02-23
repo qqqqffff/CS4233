@@ -5,9 +5,11 @@ Players :
     Jeffery
     Herman
 Locations :
-    (0, 0) CLEAR
+    (0, 0) clear player1 SNAIL
+    (3, 3) block
 Piece descriptors :
-    SNAIL omni [distance 1]
+    SNAIL OMNI [DISTANCE 1]
+    DOG LINEAR [DISTANCE 5]
 Rules :
     SCORE 10
     TURN_LIMIT 20

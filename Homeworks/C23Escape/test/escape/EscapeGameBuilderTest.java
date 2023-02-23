@@ -118,7 +118,9 @@ public class EscapeGameBuilderTest {
     }
 
     @Test
-    public void testJsonConverter() throws Exception{
-        EscapeGameInitializer egi = EscapeJsonConverter.esgConfigConverter("test/escape_configs/escape_square_coord_test.egc");
+    public void testEGConverter() throws Exception{
+//        EscapeGameInitializer egi = EscapeJsonConverter.esgConfigConverter("test/escape_configs/escape_square_coord_test.egc");
+
+        EscapeGameInitializer egi2 = EscapeJsonConverter.esgConfigConverter("test/escape_configs/escape_hex_coord_test.egc");
     }
 }

@@ -27,13 +27,13 @@ import escape.required.Rule.*;
  * MOVEABLE: YES
  * REQUIRED: NO
  */
-public class RuleDescriptor
-{
-	public RuleID ruleId;
+public class RuleDescriptor {
+	public final RuleID ruleId;
 	public int ruleValue;
 	
-	public RuleDescriptor()
-	{
+	public RuleDescriptor() {
+		this.ruleId = null;
+		this.ruleValue = Integer.MIN_VALUE;
 	    // needed for JAXB unmarshalling
 	}
 	

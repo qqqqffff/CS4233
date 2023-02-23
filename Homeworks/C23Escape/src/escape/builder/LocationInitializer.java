@@ -38,7 +38,6 @@ import escape.required.LocationType;
  */
 public class LocationInitializer {
 	final private int x, y;
-    private Coordinate locationCoordinate;
 	final private LocationType locationType;
 	final private String player;
 	final private PieceName pieceName;
@@ -64,7 +63,6 @@ public class LocationInitializer {
     public LocationType getLocationType() { return this.locationType; }
     public String getPlayer() { return this.player; }
     public PieceName getPieceName() { return this.pieceName; }
-    public Coordinate getLocationCoordinate(){ return this.locationCoordinate; }
 
     /*
      * @see java.lang.Object#toString()
