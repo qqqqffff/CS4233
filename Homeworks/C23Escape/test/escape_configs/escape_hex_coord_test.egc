@@ -8,7 +8,7 @@ Locations :
     (0, 0) clear player1 SNAIL
     (3, 3) block
 Piece descriptors :
-    SNAIL OMNI [DISTANCE 1]
+    SNAIL OMNI [DISTANCE 1, fly, jump]
     DOG LINEAR [DISTANCE 5]
 Rules :
     SCORE 10
