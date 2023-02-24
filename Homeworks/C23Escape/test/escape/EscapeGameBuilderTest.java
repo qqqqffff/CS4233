@@ -11,6 +11,8 @@ import escape.required.Coordinate;
 import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
+import java.sql.SQLOutput;
+import java.util.Arrays;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -122,5 +124,12 @@ public class EscapeGameBuilderTest {
 //        EscapeGameInitializer egi = EscapeJsonConverter.esgConfigConverter("test/escape_configs/escape_square_coord_test.egc");
 
         EscapeGameInitializer egi2 = EscapeJsonConverter.esgConfigConverter("test/escape_configs/escape_hex_coord_test.egc");
+        EscapeGameInitializer egi3 = new EscapeGameBuilder("test/escape_configs/escape_hex_coord_test.json").getGameInitializer();
+        System.out.println(egi3.getCoordinateType());
+        System.out.println(egi3.getxMax() + ", " + egi3.getyMax());
+        System.out.println(Arrays.toString(egi3.getPlayers()));
+        System.out.println(Arrays.toString(egi3.getLocationInitializers()));
+        System.out.println(Arrays.toString(egi3.getPieceTypes()));
+        System.out.println(Arrays.toString(egi3.getRules()));
     }
 }

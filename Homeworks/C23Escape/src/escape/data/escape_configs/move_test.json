@@ -9,5 +9,17 @@
     "player": "player1",
     "location_type": "CLEAR",
     "piece_name": "SNAIL"
+  }],
+  "piece_descriptors" : [{
+    "piece_name": "SNAIL",
+    "movement_pattern": "OMNI",
+    "attributes": [{
+      "distance": "1",
+      "value": "100",
+      "jump": "1"
+    }]
+  }],
+  "rules": [{
+    "turn_limit": "20"
   }]
 }

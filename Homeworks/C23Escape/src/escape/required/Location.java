@@ -4,7 +4,7 @@ package escape.required;
 public class Location {
     private final Coordinate coordinate;
     private EscapePiece escapePiece;
-    private final LocationType locationType;
+    private LocationType locationType;
     public Location(Coordinate coordinate, EscapePiece escapePiece, LocationType locationType){
         this.coordinate = coordinate;
         this.escapePiece = escapePiece;
@@ -15,5 +15,11 @@ public class Location {
     }
     public void updateEscapePiece(EscapePiece newPiece){
         this.escapePiece = newPiece;
+    }
+    public void updateLocationType(LocationType newLocationType) {
+        this.locationType = newLocationType;
+    }
+    public EscapePiece getEscapePiece(){
+        return this.escapePiece;
     }
 }

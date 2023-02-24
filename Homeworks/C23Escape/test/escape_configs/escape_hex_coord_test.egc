@@ -10,6 +10,7 @@ Locations :
 Piece descriptors :
     SNAIL OMNI [DISTANCE 1, fly, jump]
     DOG LINEAR [DISTANCE 5]
+    HORSE LINEAR
 Rules :
     SCORE 10
     TURN_LIMIT 20

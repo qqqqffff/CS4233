@@ -21,6 +21,7 @@ import static escape.required.EscapePiece.PieceName.*;
 import static escape.required.LocationType.*;
 
 import escape.data.EscapeGameSaveDataManager;
+import escape.data.EscapeGameSaveDataManager.EscapeGameInitializerKeys.*;
 import escape.required.*;
 
 /**
@@ -30,7 +31,14 @@ import escape.required.*;
  * see configs to observe the formatting
  */
 public class EscapeJsonConverter {
-    public enum EscapeConfigKeys {}
+    public static final int DEFAULT_TAB_SIZE = 4;
+    public static final char WHITE_SPACE_CHAR = ' ';
+    public static final char OPEN_PARENTHESIS_CHAR = '(';
+    public static final char CLOSED_PARENTHESIS_CHAR = ')';
+    public static final char OPEN_BRACKET_CHAR = '[';
+    public static final char CLOSED_BRACKET_CHAR = ']';
+    public static final char COMMA_CHAR = ',';
+    public static final char PERIOD_CHAR = '.';
     private EscapeJsonConverter(){}
     /**
      * Read From Json Method:
@@ -46,11 +54,12 @@ public class EscapeJsonConverter {
             jsonReader.beginObject();
             while (jsonReader.hasNext()) {
                 String key = jsonReader.nextName();
-                switch(key){
-                    case "coordinate_type" -> esgInitializer.setCoordinateType(parseCoordinateType(jsonReader.nextString()));
-                    case "x_max" -> esgInitializer.setxMax(Integer.parseInt(jsonReader.nextString()));
-                    case "y_max" -> esgInitializer.setyMax(Integer.parseInt(jsonReader.nextString()));
-                    case "locations" -> {
+                if(EscapeGameSaveDataManager.parseEscapeGameInitializerKeys(key) == null) continue;
+                switch(EscapeGameSaveDataManager.parseEscapeGameInitializerKeys(key)){
+                    case coordinate_type -> esgInitializer.setCoordinateType(parseCoordinateType(jsonReader.nextString()));
+                    case x_max -> esgInitializer.setxMax(Integer.parseInt(jsonReader.nextString()));
+                    case y_max -> esgInitializer.setyMax(Integer.parseInt(jsonReader.nextString()));
+                    case locations -> {
                         jsonReader.beginArray();
                         while(jsonReader.hasNext()) {
                             jsonReader.beginObject();
@@ -59,14 +68,14 @@ public class EscapeJsonConverter {
                         }
                         jsonReader.endArray();
                     }
-                    case "players" -> {
+                    case players -> {
                         jsonReader.beginArray();
                         while(jsonReader.hasNext()) {
                             esgInitializer.addPlayers(jsonReader.nextString());
                         }
                         jsonReader.endArray();
                     }
-                    case "piece_descriptors" -> {
+                    case piece_descriptors -> {
                         jsonReader.beginArray();
                         while(jsonReader.hasNext()) {
                             jsonReader.beginObject();
@@ -75,12 +84,14 @@ public class EscapeJsonConverter {
                         }
                         jsonReader.endArray();
                     }
-                    case "rules" -> {
-                        jsonReader.beginObject();
+                    case rules -> {
+                        jsonReader.beginArray();
                         while(jsonReader.hasNext()){
+                            jsonReader.beginObject();
                             esgInitializer.addRules(EscapeJsonConverter.parseRuleDescriptor(jsonReader));
+                            jsonReader.endObject();
                         }
-                        jsonReader.endObject();
+                        jsonReader.endArray();
                     }
                 }
             }
@@ -104,53 +115,55 @@ public class EscapeJsonConverter {
         EscapeGameInitializer esgInitializer = new EscapeGameInitializer();
         BufferedReader bufferedReader = new BufferedReader(new FileReader(fileName));
         String line = bufferedReader.readLine();
+        String tabRegex = "\s{" + DEFAULT_TAB_SIZE + "}.*";
         while(line != null){
-            if(line.contains("Coordinate")){
-                if(line.contains("type")){
-                    String type = line.substring(line.lastIndexOf(' ') + 1);
+            line = line.toUpperCase();
+            if(line.contains("COORDINATE")){
+                if(line.contains("TYPE")){
+                    String type = line.substring(line.lastIndexOf(WHITE_SPACE_CHAR) + 1);
                     esgInitializer.setCoordinateType(parseCoordinateType(type));
                     System.out.println(type);
                 }
             }
-            else if(line.contains("xMax")){
-                String max = line.substring(line.lastIndexOf(' ') + 1);
+            else if(line.contains("XMAX")){
+                String max = line.substring(line.lastIndexOf(WHITE_SPACE_CHAR) + 1);
                 esgInitializer.setxMax(Integer.parseInt(max));
             }
-            else if(line.contains("yMax")){
-                String max = line.substring(line.lastIndexOf(' ') + 1);
+            else if(line.contains("YMAX")){
+                String max = line.substring(line.lastIndexOf(WHITE_SPACE_CHAR) + 1);
                 esgInitializer.setyMax(Integer.parseInt(max));
             }
-            else if(line.contains("Players")){
+            else if(line.contains("PLAYERS")){
                 line = bufferedReader.readLine();
-                while(line != null && Pattern.matches("\s{4}.*", line)){
-                    esgInitializer.addPlayers(line.substring(4));
+                while(line != null && Pattern.matches(tabRegex, line)){
+                    esgInitializer.addPlayers(line.substring(DEFAULT_TAB_SIZE));
                     line = bufferedReader.readLine();
                 }
                 System.out.println(Arrays.toString(esgInitializer.getPlayers()));
                 continue;
             }
-            else if(line.contains("Locations")){
+            else if(line.contains("LOCATIONS")){
                 line = bufferedReader.readLine();
-                while(line != null && Pattern.matches("\s{4}.*", line)){
-                    esgInitializer.addLocationInitializer(parseLocationInitializer(line.substring(4)));
+                while(line != null && Pattern.matches(tabRegex, line)){
+                    esgInitializer.addLocationInitializer(parseLocationInitializer(line.substring(DEFAULT_TAB_SIZE)));
                     line = bufferedReader.readLine();
                 }
                 System.out.println(Arrays.toString(esgInitializer.getLocationInitializers()));
                 continue;
             }
-            else if(line.contains("Piece descriptors")){
+            else if(line.contains("PIECE DESCRIPTORS")){
                 line = bufferedReader.readLine();
-                while(line != null && Pattern.matches("\s{4}.*", line)){
-                    esgInitializer.addPieceTypes(parsePieceTypeDescriptor(line.substring(4)));
+                while(line != null && Pattern.matches(tabRegex, line)){
+                    esgInitializer.addPieceTypes(parsePieceTypeDescriptor(line.substring(DEFAULT_TAB_SIZE)));
                     line = bufferedReader.readLine();
                 }
                 System.out.println(Arrays.toString(esgInitializer.getPieceTypes()));
                 continue;
             }
-            else if(line.contains("Rules")){
+            else if(line.contains("RULES")){
                 line = bufferedReader.readLine();
-                while(line != null && Pattern.matches("\s{4}.*", line)){
-                    esgInitializer.addRules(parseRuleDescriptor(line.substring(4)));
+                while(line != null && Pattern.matches(tabRegex, line)){
+                    esgInitializer.addRules(parseRuleDescriptor(line.substring(DEFAULT_TAB_SIZE)));
                     line = bufferedReader.readLine();
                 }
                 System.out.println(Arrays.toString(esgInitializer.getRules()));
@@ -196,19 +209,19 @@ public class EscapeJsonConverter {
         EscapePiece.PieceName pieceName = null;
 
         if(line.contains("(")) {
-            x = Integer.parseInt(line.substring(line.indexOf('(') + 1, line.indexOf(',')));
+            x = Integer.parseInt(line.substring(line.indexOf(OPEN_PARENTHESIS_CHAR) + 1, line.indexOf(COMMA_CHAR)));
             try {
-                y = Integer.parseInt(line.substring(line.indexOf(',') + 2, line.indexOf(')')));
+                y = Integer.parseInt(line.substring(line.indexOf(COMMA_CHAR) + 2, line.indexOf(CLOSED_PARENTHESIS_CHAR)));
             } catch (NumberFormatException ignored) {
-                y = Integer.parseInt(line.substring(line.indexOf(',') + 1, line.indexOf(')')));
+                y = Integer.parseInt(line.substring(line.indexOf(COMMA_CHAR) + 1, line.indexOf(CLOSED_PARENTHESIS_CHAR)));
             }
         }
 
-        line = line.substring(line.indexOf('('));
+        line = line.substring(line.indexOf(CLOSED_PARENTHESIS_CHAR));
         String[] entries = line.split("\s");
         for(int i = 0; i < entries.length; i++){
             if(entries[i] == null) continue;
-            if(entries[i].contains("(") || entries[i].contains(")")) entries[i] = null;
+            if(entries[i].contains(CLOSED_PARENTHESIS_CHAR + "") || entries[i].contains(OPEN_PARENTHESIS_CHAR + "")) entries[i] = null;
             if(parseLocationType(entries[i]) != null) {
                 locationType = parseLocationType(entries[i]);
                 entries[i] = null;
@@ -312,18 +325,21 @@ public class EscapeJsonConverter {
         PieceAttribute[] attributes = new PieceAttribute[]{};
         while(reader.hasNext()){
             String key = reader.nextName();
-            switch(key){
-                case "piece_name" -> pieceName = parsePieceName(reader.nextString());
-                case "movement_pattern" -> movementPattern = parseMovementPattern(reader.nextString());
-                case "attributes" -> {
-                    reader.beginObject();
+            if(EscapeGameSaveDataManager.parseEscapeGameInitializerKeys(key) == null) continue;
+            switch(EscapeGameSaveDataManager.parseEscapeGameInitializerKeys(key)){
+                case piece_name -> pieceName = parsePieceName(reader.nextString());
+                case movement_pattern -> movementPattern = parseMovementPattern(reader.nextString());
+                case attributes -> {
+                    reader.beginArray();
                     while(reader.hasNext()){
+                        reader.beginObject();
                         PieceAttribute[] newAttributes = new PieceAttribute[attributes.length + 1];
                         System.arraycopy(attributes,0,newAttributes,0,attributes.length);
                         newAttributes[attributes.length] = parsePieceAttribute(reader);
                         attributes = newAttributes;
+                        reader.endObject();
                     }
-                    reader.endObject();
+                    reader.endArray();
                 }
             }
         }
@@ -335,12 +351,12 @@ public class EscapeJsonConverter {
         EscapePiece.MovementPattern movementPattern = null;
         PieceAttribute[] pieceAttributes = new PieceAttribute[]{};
 
-        if(line.contains("]")) {
-            pieceAttributes = parsePieceAttributes(line.substring(line.indexOf('[') + 1, line.indexOf(']')));
-            line = line.substring(0, line.indexOf("["));
+        if(line.contains(CLOSED_BRACKET_CHAR + "")) {
+            pieceAttributes = parsePieceAttributes(line.substring(line.indexOf(OPEN_BRACKET_CHAR) + 1, line.indexOf(CLOSED_BRACKET_CHAR)));
+            line = line.substring(0, line.indexOf(OPEN_BRACKET_CHAR));
         }
 
-        String[] entries = line.split(" ");
+        String[] entries = line.split("\s");
         for(int i = 0; i < entries.length; i++){
             if(entries[i] == null) continue;
             else if(parsePieceName(entries[i]) != null) pieceName = parsePieceName(entries[i]);
@@ -357,11 +373,11 @@ public class EscapeJsonConverter {
      * @return a or an array of PieceAttributes based on the method that calls
      * @throws IOException when there is an error with the JsonReader
      */
-    private static PieceAttribute parsePieceAttribute(JsonReader reader) throws IOException {
+    public static PieceAttribute parsePieceAttribute(JsonReader reader) throws IOException {
         if(reader == null) return null;
         return new PieceAttribute(parsePieceAttributeID(reader.nextName()), Integer.parseInt(reader.nextString()));
     }
-    private static PieceAttribute[] parsePieceAttributes(String attributes){
+    public static PieceAttribute[] parsePieceAttributes(String attributes){
         if(attributes == null) return null;
         List<PieceAttribute> attributeList = new ArrayList<>();
 
@@ -369,19 +385,20 @@ public class EscapeJsonConverter {
             attributeList.add(parsePieceAttribute(attributes));
         }
 
-        while(Pattern.matches(",+", attributes)){
-            attributeList.add(parsePieceAttribute(attributes));
-            attributes = attributes.substring(0, attributes.indexOf(','));
+        String regex = ".*" + COMMA_CHAR + ".*";
+        while(Pattern.matches(regex, attributes)){
+            attributeList.add(parsePieceAttribute(attributes.substring(0, attributes.indexOf(COMMA_CHAR))));
+            attributes = attributes.substring(attributes.indexOf(COMMA_CHAR) + 2);
+            if(!Pattern.matches(regex, attributes)) attributeList.add(parsePieceAttribute(attributes));
         }
         return attributeList.toArray(PieceAttribute[]::new);
     }
-    private static PieceAttribute parsePieceAttribute(String attribute){
+    public static PieceAttribute parsePieceAttribute(String attribute){
         if(attribute == null) return null;
         EscapePiece.PieceAttributeID id = parsePieceAttributeID(attribute);
         if(attribute.contains(" ")){
-            id = parsePieceAttributeID(attribute.substring(0, attribute.indexOf(' ')));
-            int endIndex = attribute.contains(",") ? attribute.indexOf(",") - 1 : attribute.length();
-            int value = Integer.parseInt(attribute.substring(attribute.indexOf(' ') + 1, endIndex));
+            id = parsePieceAttributeID(attribute.substring(0, attribute.indexOf(WHITE_SPACE_CHAR)));
+            int value = Integer.parseInt(attribute.substring(attribute.indexOf(WHITE_SPACE_CHAR) + 1));
             return new PieceAttribute(id, value);
         }
         return new PieceAttribute(id,1);
@@ -393,7 +410,7 @@ public class EscapeJsonConverter {
      * @param pieceName string value of the enum
      * @return the parsed enum if exists
      */
-    private static EscapePiece.PieceName parsePieceName(String pieceName){
+    public static EscapePiece.PieceName parsePieceName(String pieceName){
         if(pieceName == null) return null;
         pieceName = pieceName.toUpperCase(Locale.ROOT);
         if(pieceName.equals(BIRD.name())) return BIRD;
@@ -410,7 +427,7 @@ public class EscapeJsonConverter {
      * @param movementPattern string value of the enum
      * @return the parsed enum if exists
      */
-    private static EscapePiece.MovementPattern parseMovementPattern(String movementPattern){
+    public static EscapePiece.MovementPattern parseMovementPattern(String movementPattern){
         if(movementPattern == null) return null;
         movementPattern = movementPattern.toUpperCase(Locale.ROOT);
         if(movementPattern.equals(DIAGONAL.name())) return DIAGONAL;
@@ -426,7 +443,7 @@ public class EscapeJsonConverter {
      * @param pieceAttributeID string value of the enum
      * @return the parsed enum if exists
      */
-    private static EscapePiece.PieceAttributeID parsePieceAttributeID(String pieceAttributeID){
+    public static EscapePiece.PieceAttributeID parsePieceAttributeID(String pieceAttributeID){
         if(pieceAttributeID == null) return null;
         pieceAttributeID = pieceAttributeID.toUpperCase(Locale.ROOT);
         if(pieceAttributeID.equals(FLY.name())) return FLY;

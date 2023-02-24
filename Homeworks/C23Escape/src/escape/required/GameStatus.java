@@ -47,7 +47,7 @@ public interface GameStatus {
     boolean isValidMove();
 
     /**
-     * @return true if more informaton was sent to the objservers
+     * @return true if more information was sent to the observers
      */
     boolean isMoreInformation();
 

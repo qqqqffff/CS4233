@@ -1,11 +1,64 @@
 {
   "coordinate_type": "HEX",
-  "y_max": "3",
   "x_max": "3",
-  "players": ["Jeremy", "Jefferey"],
-  "locations": [{
-    "x": "0",
-    "y": "0",
-    "location_type": "BLOCK"
-  }]
+  "y_max": "3",
+  "players": [
+    "Jeffery",
+    "Herman"
+  ],
+  "locations": [
+    {
+      "x": "0",
+      "y": "0",
+      "player": "player1",
+      "location_type": "CLEAR",
+      "piece_name": "SNAIL"
+    },
+    {
+      "x": "3",
+      "y": "3",
+      "player": "null",
+      "location_type": "BLOCK",
+      "piece_name": "null"
+    }
+  ],
+  "piece_descriptors": [
+    {
+      "piece_name": "SNAIL",
+      "movement_pattern": "OMNI",
+      "attributes": [
+        {
+          "distance": "1"
+        },
+        {
+          "fly": "1"
+        },
+        {
+          "jump": "1"
+        }
+      ]
+    },
+    {
+      "piece_name": "DOG",
+      "movement_pattern": "LINEAR",
+      "attributes": [
+        {
+          "distance": "5"
+        }
+      ]
+    },
+    {
+      "piece_name": "HORSE",
+      "movement_pattern": "LINEAR",
+      "attributes": []
+    }
+  ],
+  "rules": [
+    {
+      "score": "10"
+    },
+    {
+      "turn_limit": "20"
+    }
+  ]
 }

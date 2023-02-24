@@ -25,6 +25,7 @@ import javax.xml.transform.stream.StreamSource;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -78,7 +79,7 @@ public class EscapeGameBuilder {
 	 * Take the .egc file contents and turn it into XML.
 	 * @param fileName the input configuration (.egc) file
 	 * @return the XML data needed to 
-	 * @throws IOException
+	 * @throws IOException when bad file name is pased
 	 */
 	@Deprecated
 	private String getXmlConfiguration(String fileName) throws IOException
@@ -90,8 +91,8 @@ public class EscapeGameBuilder {
 
 	/**
 	 * Unmarshal the XML into an EscapeGameInitializer object.
-	 * @param xmlConfiguration
-	 * @throws JAXBException
+	 * @param xmlConfiguration string xml file
+	 * @throws JAXBException bad conversion
 	 */
 	private EscapeGameInitializer unmarshalXml(String xmlConfiguration) throws JAXBException
 	{
@@ -117,16 +118,29 @@ public class EscapeGameBuilder {
 	 * all of the information you need to create your game.
      * @return the game instance
      ***********************************************************************/
-	//TODO: implement a current game data manager (json)
     public EscapeGameManager<Coordinate> makeGameManager() {
 		return new EscapeGameManager<Coordinate>() {
 			GameStatus currentGameStatus;
-			Location[] locations;
+			final List<Location> locations = new ArrayList<>();
+			GameObserver observer;
+			boolean initialized = false;
 			public void init(){
+				if(initialized) return;
 				//if(player_choice) return; //TODO: implement me
 				for(LocationInitializer location : gameInitializer.getLocationInitializers()){
 					Coordinate locationCoordinate = makeCoordinate(location.getX(), location.getY());
+					locations.add(new Location(locationCoordinate, new EscapePiece() {
+						@Override
+						public PieceName getName() {
+							return location.getPieceName();
+						}
+						@Override
+						public String getPlayer() {
+							return location.getPlayer();
+						}
+					}, location.getLocationType()));
 				}
+				initialized = true;
 			}
 
 			@Override
@@ -170,26 +184,68 @@ public class EscapeGameBuilder {
 						}
 					};
 				}
+				init();
 				throw new EscapeException("Coordinate Type is invalid");
 			}
 
 			@Override
 			public GameStatus move(Coordinate from, Coordinate to) {
-				if(getPieceAt(from) == null); //TODO: do something
-				EscapePiece piece = getPieceAt(from);
+				init();
+				EscapePiece pieceFrom = getPieceAt(from);
+				if(getPieceAt(from) == null){
+					System.out.println("piece is null");
+					return new GameStatus() {
+						@Override
+						public boolean isValidMove() {
+							return false;
+						}
+
+						@Override
+						public boolean isMoreInformation() {
+							return false;
+						}
+
+						@Override
+						public MoveResult getMoveResult() {
+							return null;
+						}
+
+						@Override
+						public Coordinate finalLocation() {
+							return null;
+						}
+					};
+				}
+				EscapePiece pieceTo = getPieceAt(to);
 				for(Location location : locations){
-					if(location.getCoordinate().equals(from)){
+					if(location.getCoordinate().equals(from) && pieceTo == null){
 						location.updateEscapePiece(null);
+						for(Location newLocation : locations){
+							if(newLocation.getCoordinate().equals(to)){
+								newLocation.updateEscapePiece(pieceFrom);
+								break;
+							}
+						}
+						break;
 					}
 					else if(location.getCoordinate().equals(to)){
 						//TODO: do something if there is a guy already there
+						for(PieceTypeDescriptor descriptor : gameInitializer.getPieceTypes()){
+							assert pieceFrom != null && pieceTo;
+							if(descriptor.getPieceName() == pieceFrom.getName())
+							for(PieceAttribute attribute : descriptor.getAttributes()){
+
+							}
+						}
+						int value
+						EscapeJsonConverter.parse
 					}
 				}
 				//TODO: replace with a default game status maker
 				return new GameStatus() {
 					@Override
 					public boolean isValidMove() {
-						return false;
+						return true;
 					}
 
 					@Override
@@ -204,14 +260,17 @@ public class EscapeGameBuilder {
 
 					@Override
 					public Coordinate finalLocation() {
-						return null;
+						return to;
 					}
 				};
 			}
 
 			@Override
 			public EscapePiece getPieceAt(Coordinate coordinate) {
-				return EscapeGameManager.super.getPieceAt(coordinate);
+				for(Location location : locations){
+					if(location.getCoordinate().equals(coordinate)) return location.getEscapePiece();
+				}
+				return null;
 			}
 
 
@@ -224,10 +283,6 @@ public class EscapeGameBuilder {
 			@Override
 			public GameObserver removeObserver(GameObserver observer) {
 				return EscapeGameManager.super.removeObserver(observer);
-			}
-
-			public boolean equals(Coordinate coord1, Coordinate coord2){
-				return coord1.getColumn() == coord2.getColumn() && coord1.getRow() == coord2.getRow();
 			}
 		};
 	}
