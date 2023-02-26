@@ -11,8 +11,6 @@
  *******************************************************************************/
 package escape.required;
 
-import escape.required.Coordinate;
-
 /**
  * This interface defines all of the information for a
  * client to understand the game state after a move
@@ -30,7 +28,7 @@ public interface GameStatus {
      * DRAW: The game is over and is a draw
      * NONE: The game is still in progress and neither player has won
      */
-    public static enum MoveResult { WIN, LOSE, DRAW, NONE }
+    enum MoveResult { WIN, LOSE, DRAW, NONE }
 
     /**
      * ATTACKER: The player that moved attacked another piece and won
@@ -38,10 +36,10 @@ public interface GameStatus {
      * DRAW:     The battle was a draw
      * NONE:     There was no battle
      */
-    public static enum CombatResult { ATTACKER, DEFENDER, DRAW, NONE }
+    enum CombatResult { ATTACKER, DEFENDER, DRAW, NONE }
 
     /**
-     * @return true if the move was a valid move, fals if not (an exception may have
+     * @return true if the move was a valid move, fails if not (an exception may have
      * been thown in some cases)
      */
     boolean isValidMove();

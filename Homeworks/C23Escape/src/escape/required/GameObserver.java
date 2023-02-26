@@ -12,8 +12,6 @@
 
 package escape.required;
 
-import escape.required.EscapeException;
-
 /**
  * The interface for a client to use to get messages from the
  * game manager by registering an observer.

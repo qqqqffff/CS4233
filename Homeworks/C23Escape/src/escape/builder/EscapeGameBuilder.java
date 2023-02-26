@@ -123,74 +123,21 @@ public class EscapeGameBuilder {
 			GameStatus currentGameStatus;
 			final List<Location> locations = new ArrayList<>();
 			GameObserver observer;
-			boolean initialized = false;
+			boolean initialized;
 			public void init(){
 				if(initialized) return;
 				//if(player_choice) return; //TODO: implement me
-				for(LocationInitializer location : gameInitializer.getLocationInitializers()){
-					Coordinate locationCoordinate = makeCoordinate(location.getX(), location.getY());
-					locations.add(new Location(locationCoordinate, new EscapePiece() {
-						@Override
-						public PieceName getName() {
-							return location.getPieceName();
-						}
-						@Override
-						public String getPlayer() {
-							return location.getPlayer();
-						}
-					}, location.getLocationType()));
-				}
+
 				initialized = true;
 			}
 
 			@Override
 			public Coordinate makeCoordinate(int x, int y) {
-				if(gameInitializer.getCoordinateType() == null) throw new EscapeException("Coordinate Type is not defined or null");
-				if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.HEX) {
-					if (x > gameInitializer.getxMax() || x < -gameInitializer.getxMax() || y > gameInitializer.getyMax() || y < -gameInitializer.getyMax())
-						throw new EscapeException("Coordinate Creation is out of bounds");
-					return new Coordinate() {
-						@Override
-						public int getRow() {
-							return y + (x / 2);
-						}
-
-						@Override
-						public int getColumn() {
-							return x;
-						}
-						@Override
-						public boolean equals(Coordinate obj) {
-							return this.getColumn() == obj.getColumn() && this.getRow() == obj.getRow();
-						}
-					};
-				}
-				else if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.SQUARE) {
-					if (x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0)
-						throw new EscapeException("Coordinate Creation is out of bounds");
-					return new Coordinate() {
-						@Override
-						public int getRow() {
-							return y;
-						}
-
-						@Override
-						public int getColumn() {
-							return x;
-						}
-						@Override
-						public boolean equals(Coordinate obj) {
-							return this.getColumn() == obj.getColumn() && this.getRow() == obj.getRow();
-						}
-					};
-				}
-				init();
-				throw new EscapeException("Coordinate Type is invalid");
+				return null;
 			}
 
 			@Override
 			public GameStatus move(Coordinate from, Coordinate to) {
-				init();
 				EscapePiece pieceFrom = getPieceAt(from);
 				if(getPieceAt(from) == null){
 					System.out.println("piece is null");
@@ -207,15 +154,16 @@ public class EscapeGameBuilder {
 
 						@Override
 						public MoveResult getMoveResult() {
-							return null;
+							return MoveResult.NONE;
 						}
 
 						@Override
 						public Coordinate finalLocation() {
-							return null;
+							return from;
 						}
 					};
 				}
+				assert pieceFrom != null;
 				EscapePiece pieceTo = getPieceAt(to);
 				for(Location location : locations){
 					if(location.getCoordinate().equals(from) && pieceTo == null){
@@ -228,12 +176,17 @@ public class EscapeGameBuilder {
 						}
 						break;
 					}
-					else if(location.getCoordinate().equals(to)){
+					else if(location.getCoordinate().equals(to) && pieceTo != null){
 						//TODO: do something if there is a guy already there
 						for(PieceTypeDescriptor descriptor : gameInitializer.getPieceTypes()){
-							assert pieceFrom != null && pieceTo;
-							if(descriptor.getPieceName() == pieceFrom.getName())
-							for(PieceAttribute attribute : descriptor.getAttributes()){
+							if(descriptor.getPieceName() == pieceFrom.getName()) {
+								for (PieceAttribute attribute : descriptor.getAttributes()) {
+									if(attribute.id == EscapePiece.PieceAttributeID.VALUE){
+
+									}
+								}
+							}
+							else if(descriptor.getPieceName() == pieceTo.getName()){
 
 							}
 						}
@@ -242,34 +195,11 @@ public class EscapeGameBuilder {
 					}
 				}
 				//TODO: replace with a default game status maker
-				return new GameStatus() {
-					@Override
-					public boolean isValidMove() {
-						return true;
-					}
-
-					@Override
-					public boolean isMoreInformation() {
-						return false;
-					}
-
-					@Override
-					public MoveResult getMoveResult() {
-						return null;
-					}
-
-					@Override
-					public Coordinate finalLocation() {
-						return to;
-					}
-				};
+				return currentGameStatus;
 			}
 
 			@Override
 			public EscapePiece getPieceAt(Coordinate coordinate) {
-				for(Location location : locations){
-					if(location.getCoordinate().equals(coordinate)) return location.getEscapePiece();
-				}
 				return null;
 			}
 

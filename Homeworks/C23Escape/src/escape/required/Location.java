@@ -22,4 +22,7 @@ public class Location {
     public EscapePiece getEscapePiece(){
         return this.escapePiece;
     }
+    public LocationType getLocationType(){
+        return this.locationType;
+    }
 }
