@@ -12,7 +12,6 @@
 
 package escape.required;
 
-import com.google.gson.stream.JsonReader;
 import escape.required.Rule.*;
 
 /**
@@ -27,13 +26,13 @@ import escape.required.Rule.*;
  * MOVEABLE: YES
  * REQUIRED: NO
  */
-public class RuleDescriptor {
-	public final RuleID ruleId;
+public class RuleDescriptor
+{
+	public RuleID ruleId;
 	public int ruleValue;
 	
-	public RuleDescriptor() {
-		this.ruleId = null;
-		this.ruleValue = Integer.MIN_VALUE;
+	public RuleDescriptor()
+	{
 	    // needed for JAXB unmarshalling
 	}
 	
@@ -42,7 +41,8 @@ public class RuleDescriptor {
 	 * @param ruleId
 	 * @param ruleValue
 	 */
-	public RuleDescriptor(RuleID ruleId, int ruleValue) {
+	public RuleDescriptor(RuleID ruleId, int ruleValue)
+	{
 		this.ruleId = ruleId;
 		this.ruleValue = ruleValue;
 	}

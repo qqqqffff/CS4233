@@ -12,22 +12,14 @@
 
 package escape.builder;
 
-import com.google.gson.stream.JsonReader;
-import econfig.EscapeConfigurator;
-import escape.EscapeGameManager;
-import escape.required.*;
-//import org.antlr.v4.runtime.CharStreams;
+import econfig.*;
+import escape.*;
+import escape.utilities.GameManager;
+import org.antlr.v4.runtime.*;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.transform.stream.StreamSource;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import javax.xml.bind.*;
+import javax.xml.transform.stream.*;
+import java.io.*;
 
 /**
  * This class builds an instance of an EscapeGameManager from a configuration
@@ -45,7 +37,7 @@ import java.util.List;
  * MOVEABLE: NO
  * REQUIRED: YES
  * 
- * You must change this class to be able to get the data from the configuration
+ * You must change this class to be able to get the data from the configurtion
  * file and implement the makeGameManager() method. You may not change the signature
  * of that method or the constructor for this class. You can change the file any 
  * other way that you need to.
@@ -57,7 +49,8 @@ import java.util.List;
  * your game instance. Just creating the game instance should take as little time
  * as possible to implement.
  */
-public class EscapeGameBuilder {
+public class EscapeGameBuilder
+{
     private final EscapeGameInitializer gameInitializer;
     
     /**
@@ -68,31 +61,30 @@ public class EscapeGameBuilder {
      * @param fileName the file for the Escape game configuration file (.egc).
      * @throws Exception on any errors
      */
-    public EscapeGameBuilder(String fileName) throws Exception {
-		//TODO: when i get the time i will implement a converter if i ever get the time
-		if(fileName.contains(".egc")) throw new RuntimeException("egc files are not supported, use json");
-		JsonReader reader = new JsonReader(new FileReader(fileName));
-    	gameInitializer = EscapeJsonConverter.readFromJson(reader);
+    public EscapeGameBuilder(String fileName) throws Exception
+    {
+    	String xmlConfiguration = getXmlConfiguration(fileName);
+    	// Uncomment the next instruction if you want to see the XML
+    	// System.err.println(xmlConfiguration);
+        gameInitializer = unmarshalXml(xmlConfiguration);
     }
 
 	/**
 	 * Take the .egc file contents and turn it into XML.
 	 * @param fileName the input configuration (.egc) file
 	 * @return the XML data needed to 
-	 * @throws IOException when bad file name is pased
+	 * @throws IOException
 	 */
-	@Deprecated
 	private String getXmlConfiguration(String fileName) throws IOException
 	{
 		EscapeConfigurator configurator = new EscapeConfigurator();
-//    	return configurator.makeConfiguration(CharStreams.fromFileName(fileName));
-		return null;
+    	return configurator.makeConfiguration(CharStreams.fromFileName(fileName));
 	}
 
 	/**
 	 * Unmarshal the XML into an EscapeGameInitializer object.
-	 * @param xmlConfiguration string xml file
-	 * @throws JAXBException bad conversion
+	 * @param xmlConfiguration
+	 * @throws JAXBException
 	 */
 	private EscapeGameInitializer unmarshalXml(String xmlConfiguration) throws JAXBException
 	{
@@ -118,102 +110,9 @@ public class EscapeGameBuilder {
 	 * all of the information you need to create your game.
      * @return the game instance
      ***********************************************************************/
-    public EscapeGameManager<Coordinate> makeGameManager() {
-		return new EscapeGameManager<Coordinate>() {
-			GameStatus currentGameStatus;
-			final List<Location> locations = new ArrayList<>();
-			GameObserver observer;
-			boolean initialized;
-			public void init(){
-				if(initialized) return;
-				//if(player_choice) return; //TODO: implement me
-
-				initialized = true;
-			}
-
-			@Override
-			public Coordinate makeCoordinate(int x, int y) {
-				return null;
-			}
-
-			@Override
-			public GameStatus move(Coordinate from, Coordinate to) {
-				EscapePiece pieceFrom = getPieceAt(from);
-				if(getPieceAt(from) == null){
-					System.out.println("piece is null");
-					return new GameStatus() {
-						@Override
-						public boolean isValidMove() {
-							return false;
-						}
-
-						@Override
-						public boolean isMoreInformation() {
-							return false;
-						}
-
-						@Override
-						public MoveResult getMoveResult() {
-							return MoveResult.NONE;
-						}
-
-						@Override
-						public Coordinate finalLocation() {
-							return from;
-						}
-					};
-				}
-				assert pieceFrom != null;
-				EscapePiece pieceTo = getPieceAt(to);
-				for(Location location : locations){
-					if(location.getCoordinate().equals(from) && pieceTo == null){
-						location.updateEscapePiece(null);
-						for(Location newLocation : locations){
-							if(newLocation.getCoordinate().equals(to)){
-								newLocation.updateEscapePiece(pieceFrom);
-								break;
-							}
-						}
-						break;
-					}
-					else if(location.getCoordinate().equals(to) && pieceTo != null){
-						//TODO: do something if there is a guy already there
-						for(PieceTypeDescriptor descriptor : gameInitializer.getPieceTypes()){
-							if(descriptor.getPieceName() == pieceFrom.getName()) {
-								for (PieceAttribute attribute : descriptor.getAttributes()) {
-									if(attribute.id == EscapePiece.PieceAttributeID.VALUE){
-
-									}
-								}
-							}
-							else if(descriptor.getPieceName() == pieceTo.getName()){
-
-							}
-						}
-						int value
-						EscapeJsonConverter.parse
-					}
-				}
-				//TODO: replace with a default game status maker
-				return currentGameStatus;
-			}
-
-			@Override
-			public EscapePiece getPieceAt(Coordinate coordinate) {
-				return null;
-			}
-
-
-
-			@Override
-			public GameObserver addObserver(GameObserver observer) {
-				return EscapeGameManager.super.addObserver(observer);
-			}
-
-			@Override
-			public GameObserver removeObserver(GameObserver observer) {
-				return EscapeGameManager.super.removeObserver(observer);
-			}
-		};
-	}
+    public EscapeGameManager makeGameManager()
+    {
+    	// >>> YOU MUST IMPLEMENT THIS METHOD<<<
+    	return new GameManager(this.gameInitializer);
+    }
 }

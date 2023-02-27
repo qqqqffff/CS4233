@@ -12,8 +12,6 @@
 
 package escape.required;
 
-import static escape.required.Coordinate.CoordinateType.*;
-
 /**
  * This interface defines the requirements for coordinates.
  *
@@ -28,6 +26,8 @@ import static escape.required.Coordinate.CoordinateType.*;
  */
 public interface Coordinate
 {
+    boolean equals(Coordinate obj);
+
     /**
      * This enumeration defines the valid types of coordinates that may be
      * available for this course offering. While you may not use these in
@@ -56,12 +56,5 @@ public interface Coordinate
 	 */
 	default public int getColumn() {
 		throw new EscapeException("Not implemented");
-	}
-
-
-	//TODO: generate java doc comment for this
-	default boolean equals(Coordinate coordinate){
-		if(coordinate == null) throw new NullPointerException("coordinate cannot be null");
-		return getRow() == coordinate.getRow() && getColumn() == coordinate.getColumn();
 	}
 }

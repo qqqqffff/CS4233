@@ -11,8 +11,8 @@
  *******************************************************************************/
 package escape.required;
 
-import com.google.gson.stream.JsonReader;
 import escape.required.EscapePiece.*;
+import escape.required.*;
 
 import java.util.*;
 
@@ -28,18 +28,13 @@ import java.util.*;
  * MOVEABLE: YES
  * REQUIRED: NO
  */
-public class PieceTypeDescriptor {
+public class PieceTypeDescriptor
+{
 	private PieceName pieceName;
     private MovementPattern movementPattern;
     private PieceAttribute[] attributes;
     
     public PieceTypeDescriptor() {}
-
-    public PieceTypeDescriptor(PieceName pieceName, MovementPattern movementPattern, PieceAttribute[] attributes){
-        this.pieceName = pieceName;
-        this.movementPattern = movementPattern;
-        this.attributes = attributes;
-    }
     
     /**
      * @return the pieceName
@@ -97,12 +92,6 @@ public class PieceTypeDescriptor {
 				.findFirst();
 		return attr.isPresent() ? attr.get() : null;
 	}
-    private void addPieceAttribute(PieceAttribute ... pieceAttribute){
-        PieceAttribute[] pieceAttributes = new PieceAttribute[this.attributes.length + pieceAttribute.length];
-        System.arraycopy(this.attributes,0, pieceAttributes,0, this.attributes.length);
-        System.arraycopy(pieceAttribute,0,pieceAttributes,this.attributes.length, pieceAttribute.length);
-        this.attributes = pieceAttributes;
-    }
 
 	/*
 	 * @see java.lang.Object#toString()

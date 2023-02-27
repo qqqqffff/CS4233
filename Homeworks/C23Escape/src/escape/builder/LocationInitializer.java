@@ -11,11 +11,8 @@
  *******************************************************************************/
 package escape.builder;
 
-import com.google.gson.stream.JsonReader;
-import escape.required.Coordinate;
-import escape.required.EscapePiece;
-import escape.required.EscapePiece.PieceName;
-import escape.required.LocationType;
+import escape.required.*;
+import escape.required.EscapePiece.*;
 
 /**
  * A general initializer for a board location. Since this is used
@@ -36,21 +33,21 @@ import escape.required.LocationType;
  * MOVEABLE: NO
  * REQUIRED: NO 
  */
-public class LocationInitializer {
-	final private int x, y;
-	final private LocationType locationType;
-	final private String player;
-	final private PieceName pieceName;
+public class LocationInitializer
+{
+	public int x, y;
+	public LocationType locationType;
+	public String player;
+	public PieceName pieceName;
 	
-	public LocationInitializer() {
-        this.x = 0;
-        this.y = 0;
-        this.locationType = null;
-        this.player = null;
-        this.pieceName = null;
+	public LocationInitializer() 
+	{
+	    // needed for JAXB unmarshalling
 	}
 	
-    public LocationInitializer(int x, int y, LocationType locationType, String player, PieceName pieceName) {
+    public LocationInitializer(int x, int y, LocationType locationType,
+        String player, PieceName pieceName)
+    {
     	this.x = x;
         this.y = y;
         this.locationType = locationType;

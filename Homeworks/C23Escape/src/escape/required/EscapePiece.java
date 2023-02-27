@@ -25,14 +25,13 @@ package escape.required;
  * You may extend this interface for your internal use, but this is the public interface
  * that all clients will use.
  */
-public interface EscapePiece
-{
-	public static enum PieceName {BIRD, DOG, FROG, HORSE, SNAIL};
+public interface EscapePiece {
+	enum PieceName {BIRD, DOG, FROG, HORSE, SNAIL};
 	
-	public static enum MovementPattern {DIAGONAL, LINEAR, OMNI, ORTHOGONAL};
+	enum MovementPattern {DIAGONAL, LINEAR, OMNI, ORTHOGONAL};
 	
-	public static enum PieceAttributeID {FLY, DISTANCE, JUMP, UNBLOCK, VALUE};
-
+	enum PieceAttributeID {FLY, DISTANCE, JUMP, UNBLOCK, VALUE};
+	
 	/**
 	 * @return the name
 	 */

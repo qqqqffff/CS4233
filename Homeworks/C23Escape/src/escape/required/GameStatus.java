@@ -28,7 +28,7 @@ public interface GameStatus {
      * DRAW: The game is over and is a draw
      * NONE: The game is still in progress and neither player has won
      */
-    enum MoveResult { WIN, LOSE, DRAW, NONE }
+    public static enum MoveResult { WIN, LOSE, DRAW, NONE }
 
     /**
      * ATTACKER: The player that moved attacked another piece and won
@@ -36,16 +36,16 @@ public interface GameStatus {
      * DRAW:     The battle was a draw
      * NONE:     There was no battle
      */
-    enum CombatResult { ATTACKER, DEFENDER, DRAW, NONE }
+    public static enum CombatResult { ATTACKER, DEFENDER, DRAW, NONE }
 
     /**
-     * @return true if the move was a valid move, fails if not (an exception may have
+     * @return true if the move was a valid move, fals if not (an exception may have
      * been thown in some cases)
      */
     boolean isValidMove();
 
     /**
-     * @return true if more information was sent to the observers
+     * @return true if more informaton was sent to the objservers
      */
     boolean isMoreInformation();
 
