@@ -10,6 +10,7 @@ import java.util.Map;
 import static escape.utilities.GameStatusManager.GameStatusKeys.*;
 
 public class GameStatusManager {
+    public static final boolean DISPLAY_PATH_STEPS = true;
     public enum GameStatusKeys {is_valid_move, is_more_information, get_move_result}
     private GameStatusManager(){ }
 
@@ -74,8 +75,10 @@ public class GameStatusManager {
             return observerData;
         }
         else{
-            for(Coordinate coordinate : path){
-                System.out.println(coordinate.getColumn() + ", " + coordinate.getRow());
+            if(DISPLAY_PATH_STEPS) {
+                for (Coordinate coordinate : path) {
+                    System.out.println(coordinate.getColumn() + ", " + coordinate.getRow());
+                }
             }
             observerData.put(is_valid_move, "true");
         }

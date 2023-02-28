@@ -72,7 +72,7 @@ public class EscapeGameTester {
 //        assertTrue(status.isValidMove());
     }
     @Test
-    public void testSquareCoordinate_move() throws Exception {
+    public void testSquareCoordinate_moveDiagonal() throws Exception {
         EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_move_test.egc").makeGameManager();
 
         //diagonal dog test
@@ -90,11 +90,65 @@ public class EscapeGameTester {
 
         //diagonal dog test with piece capture
 
-        //orthogonal snail test
-        i = square_move_test.makeCoordinate(5,0);
-        f = square_move_test.makeCoordinate(3,1);
-        status = square_move_test.move(i, f);
+    }
+    @Test
+    public void testSquareCoordinate_moveOrthogonal() throws Exception {
+        //(5, 0) clear Chris snail
+        EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_move_test.egc").makeGameManager();
+
+        Coordinate i = square_move_test.makeCoordinate(5,0);
+        Coordinate f = square_move_test.makeCoordinate(3,1);
+        GameStatus status = square_move_test.move(i, f);
         System.out.println(square_move_test.getPieceAt(f).getName());
+    }
+    @Test
+    public void testSquareCoordinate_moveLinear() throws Exception {
+        EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_move_test.egc").makeGameManager();
+
+        //checking all directions
+        //1
+        Coordinate i = square_move_test.makeCoordinate(5,3);
+        Coordinate f = square_move_test.makeCoordinate(6,3);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //2
+        i = f;
+        f = square_move_test.makeCoordinate(7,4);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //3
+        i = f;
+        f = square_move_test.makeCoordinate(7,5);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //4
+        i = f;
+        f = square_move_test.makeCoordinate(6,6);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //5
+        i = f;
+        f = square_move_test.makeCoordinate(5,6);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //6
+        i = f;
+        f = square_move_test.makeCoordinate(4,5);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //7
+        i = f;
+        f = square_move_test.makeCoordinate(4,4);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //8
+        i = f;
+        f = square_move_test.makeCoordinate(5,3);
+        assertTrue(square_move_test.move(i, f).isValidMove());
+        //how'd we end up back here!
+    }
+    @Test
+    public void testSquareCoordinate_moveOmni() throws Exception {
+        EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_move_test.egc").makeGameManager();
+
+        //checking all directions
+        //1
+        Coordinate i = square_move_test.makeCoordinate(1,2);
+        Coordinate f = square_move_test.makeCoordinate(2,4);
+        assertTrue(square_move_test.move(i, f).isValidMove());
     }
     @Test
     public void testBuilder_initialization(){

@@ -14,6 +14,7 @@ package escape.builder;
 
 import econfig.*;
 import escape.*;
+import escape.required.Coordinate;
 import escape.utilities.GameManager;
 import org.antlr.v4.runtime.*;
 
@@ -110,7 +111,7 @@ public class EscapeGameBuilder
 	 * all of the information you need to create your game.
      * @return the game instance
      ***********************************************************************/
-    public EscapeGameManager makeGameManager()
+    public EscapeGameManager<Coordinate> makeGameManager()
     {
     	// >>> YOU MUST IMPLEMENT THIS METHOD<<<
     	return new GameManager(this.gameInitializer);
