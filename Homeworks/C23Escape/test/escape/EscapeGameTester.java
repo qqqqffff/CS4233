@@ -74,9 +74,26 @@ public class EscapeGameTester {
     @Test
     public void testSquareCoordinate_move() throws Exception {
         EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_move_test.egc").makeGameManager();
+
+        //diagonal dog test
         Coordinate i = square_move_test.makeCoordinate(2,0);
-        Coordinate f = square_move_test.makeCoordinate(2,6);
+        Coordinate f = square_move_test.makeCoordinate(0,0);
         GameStatus status = square_move_test.move(i, f);
+        System.out.println(square_move_test.getPieceAt(f).getName());
+
+
+        //diagonal dog test with block
+        i = f;
+        f = square_move_test.makeCoordinate(3,3);
+        status = square_move_test.move(i, f);
+        System.out.println(square_move_test.getPieceAt(f).getName());
+
+        //diagonal dog test with piece capture
+
+        //orthogonal snail test
+        i = square_move_test.makeCoordinate(5,0);
+        f = square_move_test.makeCoordinate(3,1);
+        status = square_move_test.move(i, f);
         System.out.println(square_move_test.getPieceAt(f).getName());
     }
     @Test

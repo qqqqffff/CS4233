@@ -8,10 +8,13 @@ Players :
 
 Locations :
     (2, 0) clear Chris dog
+    (5, 0) clear Chris snail
+    (2, 2) block
+    (4, 0) clear Cris horse
 
 Piece descriptors :
-    SNAIL omni [distance 1]
-    DOG diagonal [distance 10]
+    SNAIL orthogonal [distance 3, value 10]
+    DOG diagonal [distance 5]
     HORSE linear [distance 7, jump]
     bird linear [fly, distance 5]
     frog omni [distance 3, unblock]
