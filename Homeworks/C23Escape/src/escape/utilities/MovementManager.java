@@ -30,6 +30,7 @@ public class MovementManager{
      * @param distance int attribute
      * @return a path (list of coordinates (steps) inclusive of origin and destination) or null if path is not possible
      */
+    //todo list was never completed! :(
     //todo: change the algorithm(s) to split another path for avoiding the obstacle vs using jump
     //todo: fix jumping
     //todo: update algorithms for non-square coordinates

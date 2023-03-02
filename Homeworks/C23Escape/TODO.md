@@ -1,8 +1,6 @@
 Name: Apollinaris Rowe
 
-Test List using file EscapeGameTester
-
-**Build Tests**
+Test List using file EscapeGameTester.java
 
 Notes:
 - Hex coordinates are fully functional

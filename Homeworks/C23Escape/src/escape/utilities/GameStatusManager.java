@@ -1,7 +1,6 @@
 package escape.utilities;
 
 import escape.EscapeGameManager;
-import escape.builder.EscapeJsonConverter;
 import escape.observers.LocationObserver;
 import escape.observers.PieceObserver;
 import escape.required.*;
@@ -10,17 +9,22 @@ import java.util.*;
 
 import static escape.utilities.GameStatusManager.GameStatusKeys.*;
 
+/**
+ * Game Status Manager Class:
+ * Handles Game Status Related Activities Statically for the Game Manager
+ */
 public class GameStatusManager {
     public static final boolean DISPLAY_PATH_STEPS = false;
     public static EscapeGameManager<Coordinate> manager;
     public enum GameStatusKeys {is_valid_move, is_more_information, get_move_result}
-    private GameStatusManager(){ }
 
-    public GameStatus.MoveResult analyzeGameStatus(List<GameObserver> gameStatus, LocationType locationType){
-        return GameStatus.MoveResult.NONE;
-    }
-
-
+    /**
+     * Game Status Generator:
+     * generates a game status based on the data and the final location
+     * @param data that will be used
+     * @param finalLocation that will also be used
+     * @return the game status
+     */
     public static GameStatus createNewGameStatus(Map<GameStatusKeys, String> data, Coordinate finalLocation){
         return new GameStatus() {
             @Override
@@ -45,6 +49,12 @@ public class GameStatusManager {
             }
         };
     }
+
+    /**
+     * Empty Status Data Map Generator:
+     * Generates a map with defaulted values that will be able to create a game status
+     * @return a map with the relevant data (or irrelevant)
+     */
     public static Map<GameStatusManager.GameStatusKeys, String> generateEmptyStatusMap(){
         Map<GameStatusManager.GameStatusKeys, String> map = new HashMap<>();
         map.put(GameStatusManager.GameStatusKeys.is_valid_move, "null");
@@ -53,9 +63,19 @@ public class GameStatusManager {
         return map;
     }
 
+    /**
+     * Verify Move Method (simple move):
+     * Verifies the move given the following parameters
+     * @param attributes attributes of the piece that is moving
+     * @param pattern movement pattern to be obeyed
+     * @param from origin coordinate
+     * @param to destination coordinate
+     * @return a map of the relevant game status data when attempting this move
+     */
     public static Map<GameStatusManager.GameStatusKeys, String> verifyMove(PieceAttribute[] attributes, EscapePiece.MovementPattern pattern, Coordinate from, Coordinate to){
         Map<GameStatusManager.GameStatusKeys, String> observerData = GameStatusManager.generateEmptyStatusMap();
 
+        //retrieving the relevant attributes
         boolean fly = false;
         boolean jump = false;
         boolean unblock = false;
@@ -73,6 +93,7 @@ public class GameStatusManager {
             }
         }
 
+        //getting the moving player's data
         String movingPlayer = null;
         PieceObserver playerObserver = null;
         for(PieceObserver observer : GameManager.pieceObservers){
@@ -84,17 +105,21 @@ public class GameStatusManager {
         }
         assert movingPlayer != null;
 
+        //getting the location type
         LocationType toLocationType = LocationType.CLEAR;
         for(LocationObserver locationObserver : GameManager.locationObservers) {
             if (locationObserver.getCoordinate().equals(to)) toLocationType = locationObserver.locationType();
         }
 
+        //attempting to generate a path
         List<Coordinate> path = MovementManager.generatePath(pattern, from, to, fly, jump, unblock,distance + 1);
+        //failed
         if(path == null|| (!fly && toLocationType.equals(LocationType.BLOCK))){
             playerObserver.notify("cannot move to (" + to.getRow() + "," + to.getColumn() + ")", new EscapeException("Bad Path"));
             observerData.put(is_valid_move, "false");
             return observerData;
         }
+        //success
         else{
             if(DISPLAY_PATH_STEPS) {
                 for (Coordinate coordinate : path) {
@@ -159,9 +184,21 @@ public class GameStatusManager {
 
         return observerData;
     }
+
+    /**
+     * Verify Move Method (piece capture):
+     * Verifying the move given the following parameters
+     * @param attackerAttributes attributes of the attacking piece
+     * @param attackerPattern attacker movement pattern
+     * @param defenderAttributes attributes of the defending piece
+     * @param from origin coordinates
+     * @param to destination coordinates
+     * @return a map with the game status as a result of attempting this move
+     */
     public static Map<GameStatusManager.GameStatusKeys, String> verifyMove(PieceAttribute[] attackerAttributes, EscapePiece.MovementPattern attackerPattern, PieceAttribute[] defenderAttributes, Coordinate from, Coordinate to){
         Map<GameStatusManager.GameStatusKeys, String> observerData = GameStatusManager.generateEmptyStatusMap();
 
+        //getting attacker and defender attributes
         boolean fly = false;
         boolean jump = false;
         boolean unblock = false;
@@ -188,6 +225,7 @@ public class GameStatusManager {
             }
         }
 
+        //getting attacker and defender data
         String attacker = null;
         String defender = null;
         PieceObserver attackerObserver = null;
@@ -204,6 +242,7 @@ public class GameStatusManager {
         }
         assert attacker != null && defender != null;
 
+        //getting location type
         LocationType toLocationType = LocationType.CLEAR;
         for(LocationObserver locationObserver : GameManager.locationObservers){
             if(locationObserver.getCoordinate().equals(to)) toLocationType = locationObserver.locationType();
@@ -211,14 +250,16 @@ public class GameStatusManager {
 
         //build a path of coordinates that the piece will go across depending on the movement pattern
         //null means that the path is not possible to be created
-        //minimum distance path will be returned
+        //minimum distance path will be returned (hopefully)
         //path includes start point
         List<Coordinate> path = MovementManager.generatePath(attackerPattern, from, to, fly, jump, unblock,distance + 1);
+        //failure
         if(path == null || (!fly && toLocationType.equals(LocationType.BLOCK))){
             attackerObserver.notify("cannot move to (" + to.getRow() + "," + to.getColumn() + ")", new EscapeException("Bad Path"));
             observerData.put(is_valid_move, "false");
             return observerData;
         }
+        //success
         else{
             if(DISPLAY_PATH_STEPS) {
                 for (Coordinate coordinate : path) {
@@ -226,7 +267,7 @@ public class GameStatusManager {
                 }
             }
 
-            //piece calculations and observer logic
+            //piece health calculations and observer logic
             String possessive = attacker.charAt(attacker.length() - 1) == 's' ? "' ": "'s ";
             int attackerHealth = attackerObserver.getPieceHealth();
             int defenderHealth = defenderObserver.getPieceHealth();
