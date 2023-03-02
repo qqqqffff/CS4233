@@ -23,9 +23,10 @@ public class GameManager implements EscapeGameManager<Coordinate> {
     protected static GameplayObserver gameObserver;
     private Integer turnLimit;
     private int currentTurnCount = 0;
-    protected static Boolean pointConflict;
+    protected static boolean pointConflict = false;
     private final List<String> currentTurnPlayers;
     private final int totalPlayers;
+    protected static Coordinate.CoordinateType coordinateSystem;
 
 
     //DEFAULTS
@@ -34,6 +35,7 @@ public class GameManager implements EscapeGameManager<Coordinate> {
 
     public GameManager(EscapeGameInitializer initializer){
         this.gameInitializer = initializer;
+        coordinateSystem = gameInitializer.getCoordinateType();
         locationObservers = new ArrayList<>();
         pieceObservers = new ArrayList<>();
         gameStatuses = new ArrayList<>();
@@ -90,10 +92,12 @@ public class GameManager implements EscapeGameManager<Coordinate> {
                     };
                     int health = 1;
                     for(PieceTypeDescriptor descriptor : initializer.getPieceTypes()){
-                        for(PieceAttribute attribute : descriptor.getAttributes()){
-                            if(attribute.getId().equals(EscapePiece.PieceAttributeID.VALUE)){
-                                health = attribute.getValue();
-                                break;
+                        if(descriptor.getPieceName().equals(piece.getName())) {
+                            for (PieceAttribute attribute : descriptor.getAttributes()) {
+                                if (attribute.getId().equals(EscapePiece.PieceAttributeID.VALUE)) {
+                                    health = attribute.getValue();
+                                    break;
+                                }
                             }
                         }
                     }
@@ -225,15 +229,15 @@ public class GameManager implements EscapeGameManager<Coordinate> {
         }
         //yes defender
         else{
+            //no captures allowed
+            if(!pointConflict){
+                gameStatuses.add(GameStatusManager.createNewGameStatus(gameStatusData, from));
+                System.out.println("Error - No Captures: No Captures are allowed!");
+                return gameStatuses.get(gameStatuses.size() - 1);
+            }
             //if there is no value attributes for the attacker or defender: both pieces die
             //if there is no value attribute for the attacker: defender wins if value is not negative
             //if there is no value for defender: attacker wins
-            for(Coordinate coordinate : pieceLocations.keySet()){
-                if(coordinate.equals(to)) {
-                    defenderCoordinate = coordinate;
-                    break;
-                }
-            }
             gameStatusData = GameStatusManager.verifyMove(attackerAttributes, attackerPattern, defenderAttributes, from, to);
             if(Boolean.parseBoolean(gameStatusData.get(is_valid_move))){
                 if(Boolean.parseBoolean(gameStatusData.get(is_more_information))){

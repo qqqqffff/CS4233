@@ -7,16 +7,9 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class EscapeGameTester {
-    private EscapeGameBuilder square_coord_test_builder;
     private EscapeGameManager<Coordinate> square_coord_test_manager;
-    private EscapeGameBuilder hex_coord_test_builder;
     private EscapeGameManager<Coordinate> hex_coord_test_manager;
-    public EscapeGameTester() throws Exception {
-
-//        square_coord_test_manager = square_coord_test_builder.makeGameManager();
-//        hex_coord_test_builder = new EscapeGameBuilder();
-//        hex_coord_test_manager = hex_coord_test_builder.makeGameManager();
-    }
+    public EscapeGameTester() throws Exception { }
 
 
     @Test
@@ -36,7 +29,7 @@ public class EscapeGameTester {
     }
     @Test
     public void testSquare_initializer() throws Exception {
-        square_coord_test_builder = new EscapeGameBuilder("test/configs/square_coord_test.egc");
+        EscapeGameBuilder square_coord_test_builder = new EscapeGameBuilder("test/configs/square_coord_test.egc");
         assertEquals(square_coord_test_builder.getGameInitializer().getCoordinateType(), Coordinate.CoordinateType.SQUARE);
         assertEquals(square_coord_test_builder.getGameInitializer().getxMax(),2);
         assertEquals(square_coord_test_builder.getGameInitializer().getyMax(),2);
@@ -61,6 +54,13 @@ public class EscapeGameTester {
 
         assertThrows(EscapeException.class, () -> hex_coord_test_manager.makeCoordinate(-21,-21));
         assertThrows(EscapeException.class, () -> hex_coord_test_manager.makeCoordinate(21,21));
+    }
+    @Test
+    public void testHexCoordinate_move() throws Exception {
+        hex_coord_test_manager = new EscapeGameBuilder("test/configs/hex_move_test.egc").makeGameManager();
+        Coordinate dI = hex_coord_test_manager.makeCoordinate(0,0);
+        Coordinate t1 = hex_coord_test_manager.makeCoordinate(-3,0);
+
     }
 
     @Test
@@ -122,6 +122,8 @@ public class EscapeGameTester {
         f = square_move_test.makeCoordinate(-150,170);
         status = square_move_test.move(i, f);
         assertTrue(status.isValidMove());
+
+        assertFalse(square_move_test.move(t2, f).isValidMove());
     }
     @Test
     public void testSquareCoordinate_moveDiagonal() throws Exception {
@@ -154,7 +156,18 @@ public class EscapeGameTester {
     }
     @Test
     public void testSquareCoordinate_capture() throws Exception {
-        EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_piece_capture_test.egc.egc").makeGameManager();
+        EscapeGameManager<Coordinate> square_move_test = new EscapeGameBuilder("test/configs/square_piece_capture_test.egc").makeGameManager();
+
+        Coordinate dI = square_move_test.makeCoordinate(3,3);
+        Coordinate bI = square_move_test.makeCoordinate(5,3);
+        Coordinate sI = square_move_test.makeCoordinate(5,2);
+
+        Coordinate dCI = square_move_test.makeCoordinate(3,5);
+        Coordinate dPI = square_move_test.makeCoordinate(4,5);
+
+        assertTrue(square_move_test.move(dI,bI).isValidMove());
+        assertTrue(square_move_test.move(bI,sI).isValidMove());
+        assertTrue(square_move_test.move(dCI,dPI).isValidMove());
     }
     @Test
     public void testSquareCoordinate_moveLinear() throws Exception {
@@ -238,7 +251,7 @@ public class EscapeGameTester {
     }
     @Test
     public void testHex_initialization() throws Exception {
-        hex_coord_test_builder = new EscapeGameBuilder("test/configs/hex_coord_test.egc");
+        EscapeGameBuilder hex_coord_test_builder = new EscapeGameBuilder("test/configs/hex_coord_test.egc");
         assertEquals(hex_coord_test_builder.getGameInitializer().getCoordinateType(), Coordinate.CoordinateType.HEX);
         assertEquals(hex_coord_test_builder.getGameInitializer().getxMax(),20);
         assertEquals(hex_coord_test_builder.getGameInitializer().getyMax(),20);

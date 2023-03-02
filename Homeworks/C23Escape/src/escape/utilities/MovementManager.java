@@ -43,6 +43,10 @@ public class MovementManager{
         if(gameLocations.get(to) == LocationType.BLOCK && !fly) return null;
 
 
+        if(!pattern.equals(EscapePiece.MovementPattern.OMNI) && coordinateSystem == Coordinate.CoordinateType.HEX){
+            gameObserver.notify("This piece does not have a valid movement pattern!", new EscapeException("Invalid Movement Pattern"));
+            return null;
+        }
         switch(pattern){
             //only for square coordinates
             case DIAGONAL -> {
@@ -574,7 +578,7 @@ public class MovementManager{
                     break;
                 }
             }
-            if(notContained && checkCoordinate(coordinate, to, jump, unblock)){
+            if(notContained && (checkCoordinate(coordinate, to, jump, unblock) || fly)){
                 List<Coordinate> newPath = new ArrayList<>(List.copyOf(originalPath));
                 newPath.add(coordinate);
                 newPath = omniPath(newPath, coordinate, to, fly, jump, unblock, distance);

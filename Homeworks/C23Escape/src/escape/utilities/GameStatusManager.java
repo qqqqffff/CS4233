@@ -6,10 +6,7 @@ import escape.observers.LocationObserver;
 import escape.observers.PieceObserver;
 import escape.required.*;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static escape.utilities.GameStatusManager.GameStatusKeys.*;
 
@@ -39,7 +36,7 @@ public class GameStatusManager {
 
             @Override
             public MoveResult getMoveResult() {
-                return EscapeJsonConverter.parseMoveResult(data.get(get_move_result));
+                return parseMoveResult(data.get(get_move_result));
             }
 
             @Override
@@ -75,6 +72,7 @@ public class GameStatusManager {
                 }
             }
         }
+
         String movingPlayer = null;
         PieceObserver playerObserver = null;
         for(PieceObserver observer : GameManager.pieceObservers){
@@ -86,9 +84,14 @@ public class GameStatusManager {
         }
         assert movingPlayer != null;
 
+        LocationType toLocationType = LocationType.CLEAR;
+        for(LocationObserver locationObserver : GameManager.locationObservers) {
+            if (locationObserver.getCoordinate().equals(to)) toLocationType = locationObserver.locationType();
+        }
+
         List<Coordinate> path = MovementManager.generatePath(pattern, from, to, fly, jump, unblock,distance + 1);
-        if(path == null){
-            playerObserver.notify(" cannot move to (" + to.getRow() + "," + to.getColumn() + ")", new EscapeException("Bad Path"));
+        if(path == null|| (!fly && toLocationType.equals(LocationType.BLOCK))){
+            playerObserver.notify("cannot move to (" + to.getRow() + "," + to.getColumn() + ")", new EscapeException("Bad Path"));
             observerData.put(is_valid_move, "false");
             return observerData;
         }
@@ -115,6 +118,7 @@ public class GameStatusManager {
             Arrays.stream(GameManager.gameObserver.getPlayers()).toList().forEach(player -> playerPieces.put(player, 0));
 
             //using observers to update information
+            //a lot of information is being handled at once
             PieceObserver observerToRemove = null;
             for(PieceObserver observer : GameManager.pieceObservers) {
                 playerPieces.put(observer.getPiece().getPlayer(), playerPieces.get(observer.getPiece().getPlayer()) + 1);
@@ -170,17 +174,39 @@ public class GameStatusManager {
                     case FLY -> fly = attribute.getValue() == 1;
                     case JUMP -> jump = attribute.getValue() == 1;
                     case UNBLOCK -> unblock = attribute.getValue() == 1;
-                    case VALUE -> attackerValue = attribute.getValue();
                     case DISTANCE -> distance = attribute.getValue();
+                    case VALUE -> attackerValue = attribute.getValue();
                 }
             }
         }
-        else if(defenderAttributes != null){
+        if(defenderAttributes != null){
             for(PieceAttribute attribute : defenderAttributes){
-                if (attribute.getId() == EscapePiece.PieceAttributeID.VALUE) {
+                if(attribute.getId().equals(EscapePiece.PieceAttributeID.VALUE)) {
                     defenderValue = attribute.getValue();
+                    break;
                 }
             }
+        }
+
+        String attacker = null;
+        String defender = null;
+        PieceObserver attackerObserver = null;
+        PieceObserver defenderObserver = null;
+        for(PieceObserver observer : GameManager.pieceObservers){
+            if(observer.getCoordinate().equals(from)) {
+                attacker = observer.getPiece().getPlayer();
+                attackerObserver = observer;
+            }
+            else if(observer.getCoordinate().equals(to)) {
+                defender = observer.getPiece().getPlayer();
+                defenderObserver = observer;
+            }
+        }
+        assert attacker != null && defender != null;
+
+        LocationType toLocationType = LocationType.CLEAR;
+        for(LocationObserver locationObserver : GameManager.locationObservers){
+            if(locationObserver.getCoordinate().equals(to)) toLocationType = locationObserver.locationType();
         }
 
         //build a path of coordinates that the piece will go across depending on the movement pattern
@@ -188,7 +214,8 @@ public class GameStatusManager {
         //minimum distance path will be returned
         //path includes start point
         List<Coordinate> path = MovementManager.generatePath(attackerPattern, from, to, fly, jump, unblock,distance + 1);
-        if(path == null || path.size() > (distance + 1)){
+        if(path == null || (!fly && toLocationType.equals(LocationType.BLOCK))){
+            attackerObserver.notify("cannot move to (" + to.getRow() + "," + to.getColumn() + ")", new EscapeException("Bad Path"));
             observerData.put(is_valid_move, "false");
             return observerData;
         }
@@ -198,9 +225,74 @@ public class GameStatusManager {
                     System.out.println(coordinate.getColumn() + ", " + coordinate.getRow());
                 }
             }
+
+            //piece calculations and observer logic
+            String possessive = attacker.charAt(attacker.length() - 1) == 's' ? "' ": "'s ";
+            int attackerHealth = attackerObserver.getPieceHealth();
+            int defenderHealth = defenderObserver.getPieceHealth();
+            attackerObserver.setPieceHealth(attackerObserver.getPieceHealth() - defenderHealth);
+            defenderObserver.setPieceHealth(defenderObserver.getPieceHealth() - attackerHealth);
+            attackerObserver.setCoordinate(to);
+            defenderObserver.setCoordinate(to);
+            if(attackerObserver.getPieceHealth() <= 0) {
+                if (defenderObserver.getPieceHealth() <= 0) {
+                    attackerObserver.notify("has been DESTROYED!");
+                    defenderObserver.notify("has been DESTROYED!");
+                    manager.removeObserver(defenderObserver);
+                    GameManager.gameObserver.updatePlayerScore(attacker, defenderValue);
+                }
+                else {
+                    attackerObserver.notify("has been CAPTURED by " + defender + possessive + defenderObserver.getPiece().getName() + "!");
+                }
+                manager.removeObserver(attackerObserver);
+                GameManager.gameObserver.updatePlayerScore(defender, attackerValue);
+            }
+            else if(defenderObserver.getPieceHealth() <= 0 && attackerObserver.getPieceHealth() > 0){
+                defenderObserver.notify("has been CAPTURED by " + attacker + possessive + attackerObserver.getPiece().getName() + "!");
+                manager.removeObserver(defenderObserver);
+                GameManager.gameObserver.updatePlayerScore(attacker, defenderValue);
+            }
+
+            Map<String, Integer> playerPieces = new HashMap<>();
+            Arrays.stream(GameManager.gameObserver.getPlayers()).toList().forEach(player -> playerPieces.put(player, 0));
+
+            //checking if the game is over
+            for(PieceObserver observer : GameManager.pieceObservers){
+                playerPieces.put(observer.getPiece().getPlayer(), playerPieces.get(observer.getPiece().getPlayer()) + 1);
+            }
+
+            boolean continueGame = true;
+            for(Integer pieces : playerPieces.values()){
+                if(pieces == 0){
+                    continueGame = false;
+                    break;
+                }
+            }
+            if(!continueGame){
+                GameManager.gameObserver.notify(attacker);
+            }
+
+            observerData.put(is_more_information, "true");
             observerData.put(is_valid_move, "true");
+            observerData.put(get_move_result, GameManager.gameObserver.getGameStatus().toString());
         }
 
         return observerData;
+    }
+
+    /**
+     * Move Result Parser:
+     * Parses the Move Result based on the string and returns the respective enum value
+     * Follows the same structure as all the other enum parsers
+     * @param moveResult string value of the enum
+     * @return the parsed enum if exists
+     */
+    public static GameStatus.MoveResult parseMoveResult(String moveResult){
+        if(moveResult == null) return GameStatus.MoveResult.NONE;
+        moveResult = moveResult.toUpperCase(Locale.ROOT);
+        if(moveResult.equals(GameStatus.MoveResult.DRAW.name())) return GameStatus.MoveResult.DRAW;
+        else if(moveResult.equals(GameStatus.MoveResult.LOSE.name())) return GameStatus.MoveResult.LOSE;
+        else if(moveResult.equals(GameStatus.MoveResult.WIN.name())) return GameStatus.MoveResult.WIN;
+        return GameStatus.MoveResult.NONE;
     }
 }

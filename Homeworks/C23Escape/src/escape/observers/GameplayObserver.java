@@ -3,10 +3,7 @@ package escape.observers;
 import escape.required.GameObserver;
 import escape.required.GameStatus;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GameplayObserver implements GameObserver {
     private GameStatus.MoveResult gameStatus = GameStatus.MoveResult.NONE;

@@ -8,7 +8,7 @@ Players :
 
 Locations :
     (-10, -10) clear Chris dog
-    (0, 0) clear Pat horse
+    (0, 0) clear Pat dog
 
 Piece descriptors :
     SNAIL orthogonal [distance 3, value 10]

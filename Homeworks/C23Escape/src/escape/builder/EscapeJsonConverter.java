@@ -450,19 +450,4 @@ public class EscapeJsonConverter {
         else if(pieceAttributeID.equals(VALUE.name())) return VALUE;
         return null;
     }
-    /**
-     * Move Result Parser:
-     * Parses the Move Result based on the string and returns the respective enum value
-     * Follows the same structure as all the other enum parsers
-     * @param moveResult string value of the enum
-     * @return the parsed enum if exists
-     */
-    public static GameStatus.MoveResult parseMoveResult(String moveResult){
-        if(moveResult == null) return GameStatus.MoveResult.NONE;
-        moveResult = moveResult.toUpperCase(Locale.ROOT);
-        if(moveResult.equals(GameStatus.MoveResult.DRAW.name())) return GameStatus.MoveResult.DRAW;
-        else if(moveResult.equals(GameStatus.MoveResult.LOSE.name())) return GameStatus.MoveResult.LOSE;
-        else if(moveResult.equals(GameStatus.MoveResult.WIN.name())) return GameStatus.MoveResult.WIN;
-        return GameStatus.MoveResult.NONE;
-    }
 }

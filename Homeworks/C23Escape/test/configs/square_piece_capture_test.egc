@@ -7,11 +7,19 @@ Players :
     Pat
 
 Locations :
-
+    (3, 3) clear Chris dog
+    (4, 3) exit
+    (5, 3) clear Pat bird
+    (5, 2) clear Chris snail
+    (3, 5) clear Chris dog
+    (4, 5) clear Pat dog
 
 Piece descriptors :
     SNAIL orthogonal [distance 3, value 10]
-    DOG omni [distance 15]
-    HORSE linear [distance 7, jump]
-    bird omni [fly, distance 5, value 100]
+    DOG omni [distance 3]
+    HORSE linear [distance 3, jump]
+    bird omni [fly, distance 3, value 100]
     frog omni [distance 3, unblock]
+
+Rules :
+    POINT_CONFLICT 1
