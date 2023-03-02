@@ -19,7 +19,7 @@ public class MovementManager{
      * Path Generation Function
      * Generates a path depending on the parameters passed (duh)
      * notes:
-     *     path will use jump on the first instance of an obstacle
+     *     path will use jump on the first instance of an obstacle (not properly working)
      *     path avoids confrontation (other players) unless confrontation occurs on to coordinate
      * @param pattern Movement pattern to follow
      * @param from origin coordinate
@@ -31,6 +31,7 @@ public class MovementManager{
      * @return a path (list of coordinates (steps) inclusive of origin and destination) or null if path is not possible
      */
     //todo: change the algorithm(s) to split another path for avoiding the obstacle vs using jump
+    //todo: fix jumping
     //todo: update algorithms for non-square coordinates
     public static List<Coordinate> generatePath(EscapePiece.MovementPattern pattern, Coordinate from, Coordinate to,
                                          boolean fly, boolean jump, boolean unblock, int distance){
@@ -101,24 +102,28 @@ public class MovementManager{
         Coordinate posX_posY, negX_posY, negX_negY, posX_negY;
         try {
             posX_posY = manager.makeCoordinate(from.getColumn() + 1, from.getRow() + 1);
+            posX_posY = pathRepeat(path, posX_posY);
         }
         catch(EscapeException ignored){
             posX_posY = null;
         }
         try {
             negX_posY = manager.makeCoordinate(from.getColumn() - 1, from.getRow() + 1);
+            negX_posY = pathRepeat(path, negX_posY);
         }
         catch(EscapeException ignored){
             negX_posY = null;
         }
         try {
             negX_negY = manager.makeCoordinate(from.getColumn() - 1, from.getRow() - 1);
+            negX_negY = pathRepeat(path, negX_negY);
         }
         catch(EscapeException ignored){
             negX_negY = null;
         }
         try{
             posX_negY = manager.makeCoordinate(from.getColumn() + 1, from.getRow() - 1);
+            posX_negY = pathRepeat(path, posX_negY);
         }
         catch(EscapeException ignored){
             posX_negY = null;
@@ -240,24 +245,28 @@ public class MovementManager{
         Coordinate posX, negX, posY, negY;
         try{
             posX = manager.makeCoordinate(from.getColumn() + 1, from.getRow());
+            posX = pathRepeat(path, posX);
         }
         catch(EscapeException ignored){
             posX = null;
         }
         try{
             negX = manager.makeCoordinate(from.getColumn() - 1, from.getRow());
+            negX = pathRepeat(path, negX);
         }
         catch(EscapeException ignored){
             negX = null;
         }
         try{
             posY = manager.makeCoordinate(from.getColumn(),from.getRow() + 1);
+            posY = pathRepeat(path, posY);
         }
         catch(EscapeException ignored){
             posY = null;
         }
         try{
             negY = manager.makeCoordinate(from.getColumn(),from.getRow() - 1);
+            negY = pathRepeat(path, negY);
         }
         catch(EscapeException ignored){
             negY = null;
@@ -443,27 +452,35 @@ public class MovementManager{
         Coordinate posX = null, posX_posY = null, posY = null, negX_posY = null, negX = null, negX_negY = null, negY = null, posX_negY = null;
         try{
             posX = manager.makeCoordinate(from.getColumn() + 1, from.getRow());
+            posX = pathRepeat(path, posX);
         }catch(EscapeException ignored){ }
         try{
             posX_posY = manager.makeCoordinate(from.getColumn() + 1, from.getRow() + 1);
+            posX_posY = pathRepeat(path, posX_posY);
         }catch(EscapeException ignored){ }
         try{
             posY = manager.makeCoordinate(from.getColumn(), from.getRow() + 1);
+            posY = pathRepeat(path, posY);
         }catch(EscapeException ignored){ }
         try{
             negX_posY = manager.makeCoordinate(from.getColumn() - 1, from.getRow() + 1);
+            negX_posY = pathRepeat(path, negX_posY);
         }catch(EscapeException ignored){ }
         try{
             negX = manager.makeCoordinate(from.getColumn() - 1, from.getRow());
+            negX = pathRepeat(path, negX);
         }catch(EscapeException ignored){ }
         try{
             negX_negY = manager.makeCoordinate(from.getColumn() - 1, from.getRow() - 1);
+            negX_negY = pathRepeat(path, negX_negY);
         }catch(EscapeException ignored){ }
         try{
             negY = manager.makeCoordinate(from.getColumn(), from.getRow() - 1);
+            negY = pathRepeat(path, negY);
         }catch(EscapeException ignored){ }
         try{
             posX_negY = manager.makeCoordinate(from.getColumn() + 1, from.getRow() - 1);
+            posX_negY = pathRepeat(path, posX_negY);
         }catch(EscapeException ignored){ }
 
         //pos x pos y
@@ -492,52 +509,44 @@ public class MovementManager{
                 //pos y
                 if(yDifference > 0) nextCoordinate = posY;
                 //neg y
-                else if(xDifference < 0) nextCoordinate = negY;
+                else if(yDifference < 0) nextCoordinate = negY;
             }
         }
-        if(nextCoordinate == null) return null; //this should ideally not happen lol, just making sure
-        if(!checkCoordinate(nextCoordinate, to, jump, unblock)){
-            if(nextCoordinate.equals(posX)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+        if(nextCoordinate == null) return splitOmniPaths(path, to, fly, jump, unblock, distance,
+                posX, posX_posY, posY, negX_posY, negX, negX_negY, negY, posX_negY);
+        if(!checkCoordinate(nextCoordinate, to, jump, unblock) && !fly){
+            if(posX != null && nextCoordinate.equals(posX)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posY, negX_posY, negX, negX_negY, negY, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(posX_posY)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(posX_posY != null && nextCoordinate.equals(posX_posY)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX, posY, negX_posY, negX, negX_negY, negY, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(posY)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(posY != null && nextCoordinate.equals(posY)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posX, negX_posY, negX, negX_negY, negY, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(negX_posY)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(negX_posY != null && nextCoordinate.equals(negX_posY)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posY, posX, negX, negX_negY, negY, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(negX)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(negX != null && nextCoordinate.equals(negX)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posY, negX_posY, posX, negX_negY, negY, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(negX_negY)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(negX_negY != null && nextCoordinate.equals(negX_negY)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posY, negX_posY, negX, posX, negY, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(negY)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(negY != null && nextCoordinate.equals(negY)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posY, negX_posY, negX, negX_negY, posX, posX_negY);
-                return computeMinimumPath(paths);
             }
-            else if(nextCoordinate.equals(posX_negY)){
-                List<List<Coordinate>> paths = splitOmniPaths(path, to, fly, jump, unblock, distance,
+            else if(posX_negY != null && nextCoordinate.equals(posX_negY)){
+                return splitOmniPaths(path, to,false, jump, unblock, distance,
                         posX_posY, posY, negX_posY, negX, negX_negY, negY, posX);
-                return computeMinimumPath(paths);
             }
-            else return null; //also shouldnt happen
         }
         path.add(nextCoordinate);
         return omniPath(path, nextCoordinate, to, fly, coordinateRequiresJump(nextCoordinate, jump), unblock, distance);
@@ -552,10 +561,10 @@ public class MovementManager{
      * other params are inherited for the orthogonal recursive calls
      * @return a list of lists containing all the coordinates of the path, null if no paths are possible
      */
-    public static List<List<Coordinate>> splitOmniPaths(List<Coordinate> originalPath, Coordinate to,
+    public static List<Coordinate> splitOmniPaths(List<Coordinate> originalPath, Coordinate to,
                                             boolean fly, boolean jump, boolean unblock, int distance, Coordinate ... coordinates){
         if(originalPath == null || coordinates == null || coordinates.length == 0) return null;
-        List<List<Coordinate>> paths = new ArrayList<>();
+        List<Coordinate> bestPath = null;
         for(Coordinate coordinate : coordinates){
             if(coordinate == null) continue;
             boolean notContained = true;
@@ -568,10 +577,12 @@ public class MovementManager{
             if(notContained && checkCoordinate(coordinate, to, jump, unblock)){
                 List<Coordinate> newPath = new ArrayList<>(List.copyOf(originalPath));
                 newPath.add(coordinate);
-                paths.add(omniPath(newPath, coordinate, to, fly, jump, unblock, distance));
+                newPath = omniPath(newPath, coordinate, to, fly, jump, unblock, distance);
+                if(newPath == null) continue;
+                if(bestPath == null || newPath.size() < bestPath.size()) bestPath = new ArrayList<>(List.copyOf(newPath));
             }
         }
-        return paths;
+        return bestPath;
     }
     /**
      * Compute Minimum Path Method
@@ -606,6 +617,7 @@ public class MovementManager{
      * @return boolean representing if the coordinate is passable
      */
     public static boolean checkCoordinate(Coordinate from, Coordinate to, boolean jump, boolean unblock){
+        if(from == null) return false;
         //check location data
         LocationType locationType = DEFAULT_LOCATION_TYPE;
         for(LocationObserver observer : locationObservers){
@@ -618,6 +630,7 @@ public class MovementManager{
             if (unblock) return true;
             return jump;
         }
+        else if(from.equals(to)) return true;
         else if(locationType == LocationType.EXIT) return false;
         for(Coordinate coordinate : pieceLocations.keySet()){
             if(coordinate.equals(from)){
@@ -653,5 +666,20 @@ public class MovementManager{
             }
         }
         return true;
+    }
+
+    /**
+     * Path Repeat Method:
+     * Method to determine if a path has repeats
+     * @param path path to check
+     * @param coordinate coordinate to be compared
+     * @return the coordinate if it exists null otherwise
+     */
+    public static Coordinate pathRepeat(List<Coordinate> path, Coordinate coordinate){
+        if(path == null || path.size() == 0 || coordinate == null) return coordinate;
+        for(Coordinate pathCoordinate : path){
+            if(pathCoordinate.equals(coordinate)) return null;
+        }
+        return coordinate;
     }
 }

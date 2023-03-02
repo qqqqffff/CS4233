@@ -7,7 +7,8 @@ Players :
     Pat
 
 Locations :
-    (5, 0) clear Chris snail
+    (5, 3) clear Chris horse
+    (0, 0) clear Pat bird
 
 Piece descriptors :
     SNAIL orthogonal [distance 3, value 10]

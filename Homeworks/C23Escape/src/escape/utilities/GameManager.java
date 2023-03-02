@@ -3,6 +3,7 @@ package escape.utilities;
 import escape.EscapeGameManager;
 import escape.builder.EscapeGameInitializer;
 import escape.builder.LocationInitializer;
+import escape.observers.GameplayObserver;
 import escape.observers.LocationObserver;
 import escape.observers.PieceObserver;
 import escape.required.*;
@@ -14,11 +15,17 @@ import static escape.utilities.GameStatusManager.GameStatusKeys.*;
 
 public class GameManager implements EscapeGameManager<Coordinate> {
     protected static List<LocationObserver> locationObservers;
-    protected static List<PieceObserver> pieceObservers;
+    public static List<PieceObserver> pieceObservers;
     protected static List<GameStatus> gameStatuses;
     protected static Map<Coordinate, LocationType> gameLocations;
     protected static Map<Coordinate, EscapePiece> pieceLocations;
     protected final EscapeGameInitializer gameInitializer;
+    protected static GameplayObserver gameObserver;
+    private Integer turnLimit;
+    private int currentTurnCount = 0;
+    protected static Boolean pointConflict;
+    private final List<String> currentTurnPlayers;
+    private final int totalPlayers;
 
 
     //DEFAULTS
@@ -30,16 +37,31 @@ public class GameManager implements EscapeGameManager<Coordinate> {
         locationObservers = new ArrayList<>();
         pieceObservers = new ArrayList<>();
         gameStatuses = new ArrayList<>();
-        //filling in the grid with clear spaces [starting from (-x, -y) -> (+x, +y)]
+        currentTurnPlayers = new ArrayList<>();
+        //filling in the grid with clear spaces
         gameLocations = initializeGrid(gameInitializer.getxMax(), gameInitializer.getyMax());
         pieceLocations = new HashMap<>();
+
+        //initializing the GameObserverManager
+        Integer maxScore = null;
+        totalPlayers = gameInitializer.getPlayers().length;
+        if(initializer.getRules() != null) {
+            for (RuleDescriptor rule : initializer.getRules()) {
+                switch (rule.ruleId) {
+                    case SCORE -> maxScore = rule.ruleValue;
+                    case TURN_LIMIT -> turnLimit = rule.ruleValue;
+                    case POINT_CONFLICT -> pointConflict = true;
+                }
+            }
+        }
+        gameObserver = new GameplayObserver(gameInitializer.getPlayers(), maxScore);
 
 
         //initializing grid with location initializers
         //if no player is specified pieces will be assigned to players incrementing at 0
         if(this.gameInitializer.getLocationInitializers() != null) {
             AtomicInteger piecePlayerAssignIndex = new AtomicInteger(0);
-            System.out.println(Arrays.toString(this.gameInitializer.getLocationInitializers()));
+//            System.out.println(Arrays.toString(this.gameInitializer.getLocationInitializers()));
             for (LocationInitializer location : this.gameInitializer.getLocationInitializers()) {
                 Coordinate locationCoordinate = makeCoordinate(location.getX(), location.getY());
                 for(Coordinate coordinate : gameLocations.keySet()){
@@ -66,6 +88,16 @@ public class GameManager implements EscapeGameManager<Coordinate> {
                             return location.getPlayer();
                         }
                     };
+                    int health = 1;
+                    for(PieceTypeDescriptor descriptor : initializer.getPieceTypes()){
+                        for(PieceAttribute attribute : descriptor.getAttributes()){
+                            if(attribute.getId().equals(EscapePiece.PieceAttributeID.VALUE)){
+                                health = attribute.getValue();
+                                break;
+                            }
+                        }
+                    }
+                    pieceObservers.add(new PieceObserver(locationCoordinate, piece, health));
                     pieceLocations.put(locationCoordinate, piece);
                 }
                 switch (location.getLocationType()) {
@@ -77,6 +109,7 @@ public class GameManager implements EscapeGameManager<Coordinate> {
             }
         }
         MovementManager.manager = this;
+        GameStatusManager.manager = this;
     }
 
     public Map<Coordinate, LocationType> initializeGrid(int maxX, int maxY){
@@ -102,17 +135,39 @@ public class GameManager implements EscapeGameManager<Coordinate> {
     public GameStatus move(Coordinate from, Coordinate to) {
         //defaulting the status data list
         Map<GameStatusManager.GameStatusKeys, String> gameStatusData = GameStatusManager.generateEmptyStatusMap();
-
+        //if the game is over can't move
+        if(!gameObserver.getGameStatus().equals(GameStatus.MoveResult.NONE)){
+            gameStatuses.add(GameStatusManager.createNewGameStatus(gameStatusData, from));
+            gameObserver.notify("Game is over!", new EscapeException("Game Over"));
+            return gameStatuses.get(gameStatuses.size() - 1);
+        }
         EscapePiece attacker = getPieceAt(from);
+
         Coordinate attackerCoordinate = null;
 
         //no piece to move, no change in game status
         if(attacker == null) {
+            gameObserver.notify("No piece is at the origin!", new EscapeException("Bad Coordinate"));
             gameStatuses.add(GameStatusManager.createNewGameStatus(gameStatusData, from));
             return gameStatuses.get(gameStatuses.size() - 1);
         }
-        //find coordinate in the map
         else{
+            //turn logic
+            for(String player : currentTurnPlayers){
+                if(attacker.getPlayer().equals(player)){
+                    String possessive = player.charAt(player.length() - 1) == 's' ? "' " : "'s ";
+                    gameObserver.notify("It is not " + player + possessive + "turn!", new EscapeException("Wrong Turn"));
+                    gameStatuses.add(GameStatusManager.createNewGameStatus(gameStatusData, from));
+                    return gameStatuses.get(gameStatuses.size() - 1);
+                }
+            }
+            currentTurnPlayers.add(attacker.getPlayer());
+            if(currentTurnPlayers.size() == totalPlayers){
+                currentTurnCount++;
+                currentTurnPlayers.clear();
+            }
+
+            //finding coordinate in the map
             for(Coordinate coordinate : pieceLocations.keySet()){
                 if(coordinate.equals(from)) {
                     attackerCoordinate = coordinate;
@@ -121,6 +176,7 @@ public class GameManager implements EscapeGameManager<Coordinate> {
             }
         }
 
+        //looking for defender
         EscapePiece defender = getPieceAt(to);
         Coordinate defenderCoordinate = null;
 
@@ -139,15 +195,35 @@ public class GameManager implements EscapeGameManager<Coordinate> {
             }
         }
 
+        //no defender
         if(defender == null){
             gameStatusData = GameStatusManager.verifyMove(attackerAttributes, attackerPattern, from, to);
             if(Boolean.parseBoolean(gameStatusData.get(is_valid_move))){
                 pieceLocations.remove(attackerCoordinate);
-                pieceLocations.put(to, attacker);
+                boolean exit = false;
+                for(LocationObserver observer : locationObservers){
+                    if(observer.getCoordinate().equals(to)){
+                        exit = observer.locationType().equals(LocationType.EXIT);
+                        break;
+                    }
+                }
+                if(!exit) pieceLocations.put(to, attacker);
             }
-            gameStatuses.add(GameStatusManager.createNewGameStatus(gameStatusData, to));
-            return gameStatuses.get(gameStatuses.size() - 1);
+            else{
+                //fixing current player turn
+                if(currentTurnPlayers.size() == 0){
+                    for(String player : gameInitializer.getPlayers()){
+                        if(player.equals(attacker.getPlayer())) continue;
+                        currentTurnPlayers.add(player);
+                    }
+                    currentTurnCount--;
+                }
+                else{
+                    currentTurnPlayers.remove(attacker.getPlayer());
+                }
+            }
         }
+        //yes defender
         else{
             //if there is no value attributes for the attacker or defender: both pieces die
             //if there is no value attribute for the attacker: defender wins if value is not negative
@@ -159,9 +235,18 @@ public class GameManager implements EscapeGameManager<Coordinate> {
                 }
             }
             gameStatusData = GameStatusManager.verifyMove(attackerAttributes, attackerPattern, defenderAttributes, from, to);
+            if(Boolean.parseBoolean(gameStatusData.get(is_valid_move))){
+                if(Boolean.parseBoolean(gameStatusData.get(is_more_information))){
+                    //todo: do something
+                }
+            }
         }
-
-        throw new EscapeException("Game Status Could not be created");
+        //last player has gone
+        if(Boolean.parseBoolean(gameStatusData.get(is_valid_move)) && turnLimit != null && currentTurnCount > turnLimit){
+            gameObserver.notify(attacker.getPlayer());
+        }
+        gameStatuses.add(GameStatusManager.createNewGameStatus(gameStatusData, to));
+        return gameStatuses.get(gameStatuses.size() - 1);
     }
 
     @Override
@@ -196,8 +281,10 @@ public class GameManager implements EscapeGameManager<Coordinate> {
             };
         }
         else if (gameInitializer.getCoordinateType() == Coordinate.CoordinateType.SQUARE) {
-            if (x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0)
-                throw new EscapeException("Coordinate Parameters are out of bounds");
+            if(!(gameInitializer.getxMax() == 0 && gameInitializer.getyMax() == 0)) {
+                if (x > gameInitializer.getxMax() || x < 0 || y > gameInitializer.getyMax() || y < 0)
+                    throw new EscapeException("Coordinate Parameters are out of bounds");
+            }
             return new Coordinate() {
                 @Override
                 public int getRow() {
@@ -224,6 +311,10 @@ public class GameManager implements EscapeGameManager<Coordinate> {
 
     @Override
     public GameObserver removeObserver(GameObserver observer) {
-        return EscapeGameManager.super.removeObserver(observer);
+        if(observer == null) return null;
+        if(observer.getClass().equals(PieceObserver.class)){
+            pieceObservers.remove(observer);
+        }
+        return observer;
     }
 }

@@ -19,8 +19,6 @@ import static escape.required.EscapePiece.PieceAttributeID.VALUE;
 import static escape.required.EscapePiece.PieceName.*;
 import static escape.required.LocationType.*;
 
-import escape.data.EscapeGameSaveDataManager;
-import escape.data.EscapeGameSaveDataManager.EscapeGameInitializerKeys.*;
 import escape.required.*;
 
 /**
